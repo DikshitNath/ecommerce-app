@@ -1,98 +1,183 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Pressable,
+} from "react-native";
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+import ProductCard from "../components/ProductCard";
+
+const products = [
+  {
+    id: "1",
+    name: "Wireless Headphones",
+    price: 1499,
+    description: "Premium sound quality",
+  },
+  {
+    id: "2",
+    name: "Smart Watch",
+    price: 2499,
+    description: "Fitness and health tracking",
+  },
+  {
+    id: "3",
+    name: "Running Shoes",
+    price: 1999,
+    description: "Comfortable everyday shoes",
+  },
+];
+
+function HomeHeader() {
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <View>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.logo}>ShopEase</Text>
+        <Text style={styles.cart}>🛒</Text>
+      </View>
+
+      {/* Welcome */}
+      <View style={styles.welcome}>
+        <Text style={styles.heading}>
+          Discover Products
+        </Text>
+        <Text style={styles.subtitle}>
+          Find everything you need.
+        </Text>
+      </View>
+
+      {/* Banner */}
+      <View style={styles.banner}>
+        <Text style={styles.bannerTitle}>
+          Summer Sale!
+        </Text>
+        <Text style={styles.bannerText}>
+          Get up to 50% off
+        </Text>
+
+        <Pressable style={styles.button}>
+          <Text style={styles.buttonText}>
+            Shop Now
+          </Text>
+        </Pressable>
+      </View>
+
+      {/* Categories */}
+      <Text style={styles.sectionTitle}>
+        Categories
+      </Text>
+
+      <View style={styles.categories}>
+        {["Fashion", "Electronics", "Shoes", "Watches"].map(
+          (category) => (
+            <Pressable
+              key={category}
+              style={styles.category}
+            >
+              <Text>{category}</Text>
+            </Pressable>
+          )
+        )}
+      </View>
+
+      <Text style={styles.sectionTitle}>
+        Popular Products
+      </Text>
+    </View>
   );
 }
 
 export default function HomeScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+    <FlatList
+      data={products}
+      keyExtractor={(item) => item.id}
+      ListHeaderComponent={<HomeHeader />}
+      renderItem={({ item }) => (
+        <ProductCard
+          name={item.name}
+          price={item.price}
+          description={item.description}
+        />
+      )}
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    padding: 20,
+    backgroundColor: "#F8FAFC",
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 30,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  logo: {
+    fontSize: 24,
+    fontWeight: "bold",
   },
-  title: {
-    textAlign: 'center',
+  cart: {
+    fontSize: 24,
   },
-  code: {
-    textTransform: 'uppercase',
+  welcome: {
+    marginTop: 35,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  heading: {
+    fontSize: 26,
+    fontWeight: "bold",
+  },
+  subtitle: {
+    color: "gray",
+    marginTop: 5,
+  },
+  banner: {
+    backgroundColor: "#2563EB",
+    padding: 25,
+    borderRadius: 15,
+    marginTop: 25,
+  },
+  bannerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+  },
+  bannerText: {
+    color: "white",
+    marginTop: 8,
+  },
+  button: {
+    backgroundColor: "white",
+    padding: 12,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    marginTop: 15,
+  },
+  buttonText: {
+    color: "#2563EB",
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 30,
+    marginBottom: 15,
+  },
+  categories: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  category: {
+    backgroundColor: "white",
+    padding: 15,
+    borderRadius: 10,
   },
 });
