@@ -10,6 +10,8 @@ import {
 
 import { useRouter } from "expo-router";
 
+import type { Product } from "../../services/product.service";
+
 import ProductCard from "../../components/ProductCard";
 import { useCartStore } from "../../stores/cart-store";
 import { useProducts } from "../../hooks/use-products";
@@ -108,7 +110,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <FlatList
+    <FlatList<Product>
       data={products ?? []}
       keyExtractor={(item) => item._id}
       ListHeaderComponent={<HomeHeader />}
@@ -117,12 +119,14 @@ export default function HomeScreen() {
           No products available.
         </Text>
       }
-      renderItem={({ item }) => (
+      renderItem={({ item }: { item: Product }) => (
         <ProductCard
           id={item._id}
           name={item.name}
           price={item.price}
           description={item.description}
+          stock={item.stock}
+          hasVariants={item.variants.length > 0}
         />
       )}
       contentContainerStyle={styles.container}

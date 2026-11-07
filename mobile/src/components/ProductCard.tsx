@@ -6,6 +6,7 @@ import {
   Pressable,
 } from "react-native";
 
+import { useRouter } from "expo-router";
 import { useCartStore } from "../stores/cart-store";
 
 type ProductCardProps = {
@@ -13,6 +14,8 @@ type ProductCardProps = {
   name: string;
   price: number;
   description: string;
+  stock: number;
+  hasVariants: boolean;
 };
 
 export default function ProductCard({
@@ -20,7 +23,10 @@ export default function ProductCard({
   name,
   price,
   description,
+  stock,
+  hasVariants,
 }: ProductCardProps) {
+  const router = useRouter();
 
   const addToCart = useCartStore(
     (state) => state.addToCart
@@ -34,58 +40,145 @@ export default function ProductCard({
     (state) => state.decreaseQuantity
   );
 
-  const quantity = useCartStore(
-    (state) =>
-      state.items.find((item) => item.id === id)?.quantity ?? 0
+  // Find all cart entries belonging to this product.
+  // Subscribe to the original cart items array.
+  const items = useCartStore((state) => state.items);
+
+  // Derive product-specific entries outside the Zustand selector.
+  const productItems = items.filter((item) => item.id === id);
+
+  const totalQuantity = productItems.reduce(
+    (total, item) => total + item.quantity,
+    0
   );
 
-  const product = {
-    id,
-    name,
-    price,
-    description,
+  const isOutOfStock = stock <= 0;
+  const isLimitReached = totalQuantity >= stock;
+
+  // Products with variants must be configured on their details page.
+  const requiresVariants = hasVariants;
+
+  const handleAdd = () => {
+    if (isOutOfStock) return;
+
+    if (requiresVariants) {
+      router.push({
+        pathname: "/product-details",
+        params: { id },
+      });
+      return;
+    }
+
+    addToCart({
+      id,
+      name,
+      price,
+      description,
+      stock,
+    });
   };
 
   return (
     <View style={styles.card}>
-      <Text style={styles.name}>{name}</Text>
+      <Pressable
+        onPress={() =>
+          router.push({
+            pathname: "/product-details",
+            params: { id },
+          })
+        }
+      >
+        <Text style={styles.name}>{name}</Text>
 
-      <Text style={styles.price}>
-        ₹{price.toLocaleString("en-IN")}
-      </Text>
+        <Text style={styles.price}>
+          ₹{price.toLocaleString("en-IN")}
+        </Text>
 
-      <Text style={styles.description}>
-        {description}
-      </Text>
+        <Text style={styles.description}>
+          {description}
+        </Text>
 
-      {quantity === 0 ? (
+        <Text
+          style={[
+            styles.stock,
+            isOutOfStock && styles.outOfStock,
+          ]}
+        >
+          {isOutOfStock
+            ? "Out of stock"
+            : `${stock} available`}
+        </Text>
+
+        <Text style={styles.detailsLink}>
+          View details →
+        </Text>
+      </Pressable>
+
+      {isOutOfStock ? (
+        <View style={styles.disabledButton}>
+          <Text style={styles.disabledText}>
+            Out of Stock
+          </Text>
+        </View>
+      ) : requiresVariants ? (
         <Pressable
           style={styles.addButton}
-          onPress={() => addToCart(product)}
+          onPress={handleAdd}
+        >
+          <Text style={styles.buttonText}>
+            Select Options
+          </Text>
+        </Pressable>
+      ) : totalQuantity === 0 ? (
+        <Pressable
+          style={styles.addButton}
+          onPress={handleAdd}
         >
           <Text style={styles.buttonText}>
             Add to Cart
           </Text>
         </Pressable>
       ) : (
-        <View style={styles.quantityContainer}>
-          <Pressable
-            style={styles.quantityButton}
-            onPress={() => decreaseQuantity(id)}
-          >
-            <Text>-</Text>
-          </Pressable>
+        <View>
+          <View style={styles.quantityContainer}>
+            <Pressable
+              style={styles.quantityButton}
+              onPress={() =>
+                decreaseQuantity(productItems[0].cartItemId)
+              }
+            >
+              <Text>-</Text>
+            </Pressable>
 
-          <Text style={styles.quantity}>
-            {quantity}
-          </Text>
+            <Text style={styles.quantity}>
+              {totalQuantity}
+            </Text>
 
-          <Pressable
-            style={styles.quantityButton}
-            onPress={() => increaseQuantity(id)}
-          >
-            <Text>+</Text>
-          </Pressable>
+            <Pressable
+              style={[
+                styles.quantityButton,
+                isLimitReached && styles.disabledButton,
+              ]}
+              disabled={isLimitReached}
+              onPress={() =>
+                increaseQuantity(productItems[0].cartItemId)
+              }
+            >
+              <Text>+</Text>
+            </Pressable>
+          </View>
+
+          {productItems.length > 1 && (
+            <Text style={styles.variantNote}>
+              Multiple variants in cart. Manage them in Cart.
+            </Text>
+          )}
+
+          {isLimitReached && (
+            <Text style={styles.limitText}>
+              Maximum available stock reached
+            </Text>
+          )}
         </View>
       )}
     </View>
@@ -112,6 +205,19 @@ const styles = StyleSheet.create({
     color: "gray",
     marginTop: 5,
   },
+  stock: {
+    color: "#16A34A",
+    marginTop: 8,
+    fontSize: 13,
+  },
+  outOfStock: {
+    color: "#DC2626",
+  },
+  detailsLink: {
+    color: "#2563EB",
+    marginTop: 10,
+    fontWeight: "600",
+  },
   addButton: {
     backgroundColor: "#2563EB",
     padding: 12,
@@ -121,6 +227,17 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
+    fontWeight: "bold",
+  },
+  disabledButton: {
+    backgroundColor: "#CBD5E1",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 15,
+    alignItems: "center",
+  },
+  disabledText: {
+    color: "#475569",
     fontWeight: "bold",
   },
   quantityContainer: {
@@ -137,5 +254,15 @@ const styles = StyleSheet.create({
   quantity: {
     fontSize: 18,
     fontWeight: "bold",
+  },
+  variantNote: {
+    color: "#64748B",
+    fontSize: 12,
+    marginTop: 8,
+  },
+  limitText: {
+    color: "#DC2626",
+    fontSize: 12,
+    marginTop: 8,
   },
 });
