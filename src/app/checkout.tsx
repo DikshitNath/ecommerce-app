@@ -32,12 +32,11 @@ export default function CheckoutScreen() {
 
   const handleContinue = () => {
     if (items.length === 0) {
-      Alert.alert("Empty Cart", "Please add products before checkout.");
+      Alert.alert("Empty Cart", "Please add products first.");
       return;
     }
 
-    // Payment screen will be implemented next
-    Alert.alert("Checkout", "Payment integration is coming next!");
+    router.push("/payment");
   };
 
   const renderItem = ({ item }: { item: (typeof items)[number] }) => (
