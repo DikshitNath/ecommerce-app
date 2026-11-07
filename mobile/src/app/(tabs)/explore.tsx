@@ -1,180 +1,244 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  FlatList,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-  const theme = useTheme();
+import ProductCard from "../../components/ProductCard";
+import { useProducts } from "../../hooks/use-products";
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
+const categories = ["All", "Electronics", "Fashion"];
+
+export default function ExploreScreen() {
+  const [searchText, setSearchText] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const {
+    data: products,
+    isLoading,
+    isError,
+    refetch,
+  } = useProducts({
+    search: activeSearch,
+    category:
+      selectedCategory === "All" ? undefined : selectedCategory,
   });
 
+  const clearFilters = () => {
+    setSearchText("");
+    setActiveSearch("");
+    setSelectedCategory("All");
+  };
+
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+    <FlatList
+      style={styles.screen}
+      contentContainerStyle={styles.container}
+      data={products ?? []}
+      keyExtractor={(item) => item._id}
+      ListHeaderComponent={
+        <View>
+          <Text style={styles.heading}>Explore Products</Text>
+          <Text style={styles.subtitle}>
+            Find products that match your needs.
+          </Text>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search products..."
+              value={searchText}
+              onChangeText={setSearchText}
+              onSubmitEditing={() => setActiveSearch(searchText.trim())}
+              returnKeyType="search"
+            />
+
+            <Pressable
+              style={styles.searchButton}
+              onPress={() => setActiveSearch(searchText.trim())}
+            >
+              <Text style={styles.searchButtonText}>Search</Text>
             </Pressable>
-          </ExternalLink>
-        </ThemedView>
+          </View>
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+          <Text style={styles.sectionTitle}>Categories</Text>
 
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
+          <View style={styles.categories}>
+            {categories.map((category) => {
+              const isActive = selectedCategory === category;
 
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+              return (
+                <Pressable
+                  key={category}
+                  onPress={() => setSelectedCategory(category)}
+                  style={[
+                    styles.category,
+                    isActive && styles.activeCategory,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      isActive && styles.activeCategoryText,
+                    ]}
+                  >
+                    {category}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
 
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+          <View style={styles.resultsHeader}>
+            <Text style={styles.sectionTitle}>Products</Text>
 
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+            <Pressable onPress={clearFilters}>
+              <Text style={styles.clearText}>Clear filters</Text>
+            </Pressable>
+          </View>
+        </View>
+      }
+      renderItem={({ item }) => (
+        <ProductCard
+          id={item._id}
+          name={item.name}
+          price={item.price}
+          description={item.description}
+        />
+      )}
+      ListEmptyComponent={
+        <View style={styles.center}>
+          {isLoading ? (
+            <>
+              <ActivityIndicator size="large" color="#2563EB" />
+              <Text style={styles.statusText}>Loading products...</Text>
+            </>
+          ) : isError ? (
+            <>
+              <Text style={styles.errorText}>
+                Unable to load products.
+              </Text>
+              <Pressable style={styles.retryButton} onPress={() => refetch()}>
+                <Text style={styles.retryText}>Try Again</Text>
+              </Pressable>
+            </>
+          ) : (
+            <Text style={styles.statusText}>
+              No matching products found.
+            </Text>
+          )}
+        </View>
+      }
+      showsVerticalScrollIndicator={false}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
+  screen: {
     flex: 1,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    backgroundColor: "#F8FAFC",
   },
   container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
+    padding: 20,
+    paddingTop: 50,
   },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
+  heading: {
+    fontSize: 26,
+    fontWeight: "bold",
   },
-  centerText: {
-    textAlign: 'center',
+  subtitle: {
+    color: "gray",
+    marginTop: 6,
   },
-  pressed: {
-    opacity: 0.7,
+  searchContainer: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 25,
   },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
-    alignItems: 'center',
+  searchInput: {
+    flex: 1,
+    backgroundColor: "white",
+    padding: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+  searchButton: {
+    backgroundColor: "#2563EB",
+    justifyContent: "center",
+    paddingHorizontal: 18,
+    borderRadius: 10,
   },
-  collapsibleContent: {
-    alignItems: 'center',
+  searchButtonText: {
+    color: "white",
+    fontWeight: "bold",
   },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
+  sectionTitle: {
+    fontSize: 19,
+    fontWeight: "bold",
+    marginTop: 25,
+    marginBottom: 12,
   },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
+  categories: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  category: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  activeCategory: {
+    backgroundColor: "#2563EB",
+    borderColor: "#2563EB",
+  },
+  categoryText: {
+    color: "#334155",
+  },
+  activeCategoryText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  resultsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  clearText: {
+    color: "#2563EB",
+    fontWeight: "600",
+  },
+  center: {
+    paddingVertical: 40,
+    alignItems: "center",
+  },
+  statusText: {
+    color: "gray",
+    marginTop: 12,
+  },
+  errorText: {
+    color: "red",
+  },
+  retryButton: {
+    backgroundColor: "#2563EB",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  retryText: {
+    color: "white",
+    fontWeight: "bold",
   },
 });

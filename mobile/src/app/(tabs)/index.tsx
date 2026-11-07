@@ -5,51 +5,30 @@ import {
   StyleSheet,
   FlatList,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 
 import { useRouter } from "expo-router";
 
 import ProductCard from "../../components/ProductCard";
 import { useCartStore } from "../../stores/cart-store";
-
-const products = [
-  {
-    id: "1",
-    name: "Wireless Headphones",
-    price: 1499,
-    description: "Premium sound quality",
-  },
-  {
-    id: "2",
-    name: "Smart Watch",
-    price: 2499,
-    description: "Fitness and health tracking",
-  },
-  {
-    id: "3",
-    name: "Running Shoes",
-    price: 1999,
-    description: "Comfortable everyday shoes",
-  },
-];
-
+import { useProducts } from "../../hooks/use-products";
 
 function HomeHeader() {
-  const totalItems = useCartStore(
-    (state) =>
-      state.items.reduce(
-        (total, item) => total + item.quantity,
-        0
-      )
+  const totalItems = useCartStore((state) =>
+    state.items.reduce(
+      (total, item) => total + item.quantity,
+      0
+    )
   );
 
   const router = useRouter();
 
   return (
     <View>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.logo}>ShopEase</Text>
+
         <Pressable
           onPress={() => router.push("/cart")}
           accessibilityRole="button"
@@ -59,44 +38,30 @@ function HomeHeader() {
         </Pressable>
       </View>
 
-      {/* Welcome */}
       <View style={styles.welcome}>
-        <Text style={styles.heading}>
-          Discover Products
-        </Text>
+        <Text style={styles.heading}>Discover Products</Text>
         <Text style={styles.subtitle}>
           Find everything you need.
         </Text>
       </View>
 
-      {/* Banner */}
       <View style={styles.banner}>
-        <Text style={styles.bannerTitle}>
-          Summer Sale!
-        </Text>
+        <Text style={styles.bannerTitle}>Summer Sale!</Text>
         <Text style={styles.bannerText}>
           Get up to 50% off
         </Text>
 
         <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>
-            Shop Now
-          </Text>
+          <Text style={styles.buttonText}>Shop Now</Text>
         </Pressable>
       </View>
 
-      {/* Categories */}
-      <Text style={styles.sectionTitle}>
-        Categories
-      </Text>
+      <Text style={styles.sectionTitle}>Categories</Text>
 
       <View style={styles.categories}>
         {["Fashion", "Electronics", "Shoes", "Watches"].map(
           (category) => (
-            <Pressable
-              key={category}
-              style={styles.category}
-            >
+            <Pressable key={category} style={styles.category}>
               <Text>{category}</Text>
             </Pressable>
           )
@@ -111,14 +76,50 @@ function HomeHeader() {
 }
 
 export default function HomeScreen() {
+  const { data: products, isLoading, isError, refetch } =
+    useProducts();
+
+  if (isLoading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#2563EB" />
+        <Text style={styles.statusText}>
+          Loading products...
+        </Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>
+          Unable to load products.
+        </Text>
+
+        <Pressable
+          style={styles.retryButton}
+          onPress={() => refetch()}
+        >
+          <Text style={styles.retryText}>Try Again</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <FlatList
-      data={products}
-      keyExtractor={(item) => item.id}
+      data={products ?? []}
+      keyExtractor={(item) => item._id}
       ListHeaderComponent={<HomeHeader />}
+      ListEmptyComponent={
+        <Text style={styles.statusText}>
+          No products available.
+        </Text>
+      }
       renderItem={({ item }) => (
         <ProductCard
-          id={item.id}
+          id={item._id}
           name={item.name}
           price={item.price}
           description={item.description}
@@ -144,9 +145,6 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 24,
     fontWeight: "bold",
-  },
-  cart: {
-    fontSize: 24,
   },
   welcome: {
     marginTop: 35,
@@ -200,5 +198,29 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 15,
     borderRadius: 10,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+  },
+  statusText: {
+    marginTop: 12,
+    color: "gray",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 16,
+  },
+  retryButton: {
+    backgroundColor: "#2563EB",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 15,
+  },
+  retryText: {
+    color: "white",
+    fontWeight: "bold",
   },
 });
