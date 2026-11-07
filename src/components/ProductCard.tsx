@@ -6,56 +6,45 @@ import {
   Pressable,
 } from "react-native";
 
-import { useState } from "react";
+import { useCartStore } from "../stores/cart-store";
 
 type ProductCardProps = {
+  id: string;
   name: string;
   price: number;
   description: string;
 };
 
-type QuantityProps = {
-  quantity: number;
-  setQuantity: React.Dispatch<React.SetStateAction<number>>;
-};
-
-function PlusMinusItems({
-  quantity,
-  setQuantity,
-}: QuantityProps) {
-  return (
-    <View style={styles.quantityContainer}>
-      <Pressable
-        onPress={() =>
-          setQuantity(prev => Math.max(0, prev - 1))
-        }
-        style={styles.quantityButton}
-        accessibilityLabel="Decrease quantity"
-      >
-        <Text>-</Text>
-      </Pressable>
-
-      <Text style={styles.quantity}>{quantity}</Text>
-
-      <Pressable
-        onPress={() =>
-          setQuantity(prev => prev + 1)
-        }
-        style={styles.quantityButton}
-        accessibilityLabel="Increase quantity"
-      >
-        <Text>+</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 export default function ProductCard({
+  id,
   name,
   price,
   description,
 }: ProductCardProps) {
-  const [quantity, setQuantity] = useState(0);
+
+  const addToCart = useCartStore(
+    (state) => state.addToCart
+  );
+
+  const increaseQuantity = useCartStore(
+    (state) => state.increaseQuantity
+  );
+
+  const decreaseQuantity = useCartStore(
+    (state) => state.decreaseQuantity
+  );
+
+  const quantity = useCartStore(
+    (state) =>
+      state.items.find((item) => item.id === id)?.quantity ?? 0
+  );
+
+  const product = {
+    id,
+    name,
+    price,
+    description,
+  };
 
   return (
     <View style={styles.card}>
@@ -71,18 +60,33 @@ export default function ProductCard({
 
       {quantity === 0 ? (
         <Pressable
-          onPress={() => setQuantity(1)}
           style={styles.addButton}
+          onPress={() => addToCart(product)}
         >
-          <Text style={styles.addButtonText}>
+          <Text style={styles.buttonText}>
             Add to Cart
           </Text>
         </Pressable>
       ) : (
-        <PlusMinusItems
-          quantity={quantity}
-          setQuantity={setQuantity}
-        />
+        <View style={styles.quantityContainer}>
+          <Pressable
+            style={styles.quantityButton}
+            onPress={() => decreaseQuantity(id)}
+          >
+            <Text>-</Text>
+          </Pressable>
+
+          <Text style={styles.quantity}>
+            {quantity}
+          </Text>
+
+          <Pressable
+            style={styles.quantityButton}
+            onPress={() => increaseQuantity(id)}
+          >
+            <Text>+</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -115,15 +119,15 @@ const styles = StyleSheet.create({
     marginTop: 15,
     alignItems: "center",
   },
-  addButtonText: {
+  buttonText: {
     color: "white",
     fontWeight: "bold",
   },
   quantityContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 15,
     gap: 15,
+    marginTop: 15,
   },
   quantityButton: {
     padding: 10,

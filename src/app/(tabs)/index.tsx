@@ -7,7 +7,10 @@ import {
   Pressable,
 } from "react-native";
 
-import ProductCard from "../components/ProductCard";
+import { useRouter } from "expo-router";
+
+import ProductCard from "../../components/ProductCard";
+import { useCartStore } from "../../stores/cart-store";
 
 const products = [
   {
@@ -30,13 +33,30 @@ const products = [
   },
 ];
 
+
 function HomeHeader() {
+  const totalItems = useCartStore(
+    (state) =>
+      state.items.reduce(
+        (total, item) => total + item.quantity,
+        0
+      )
+  );
+
+  const router = useRouter();
+
   return (
     <View>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.logo}>ShopEase</Text>
-        <Text style={styles.cart}>🛒</Text>
+        <Pressable
+          onPress={() => router.push("/cart")}
+          accessibilityRole="button"
+          accessibilityLabel="Open shopping cart"
+        >
+          <Text style={{ fontSize: 24 }}>🛒 {totalItems}</Text>
+        </Pressable>
       </View>
 
       {/* Welcome */}
@@ -98,6 +118,7 @@ export default function HomeScreen() {
       ListHeaderComponent={<HomeHeader />}
       renderItem={({ item }) => (
         <ProductCard
+          id={item.id}
           name={item.name}
           price={item.price}
           description={item.description}
