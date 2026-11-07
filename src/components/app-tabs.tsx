@@ -40,6 +40,10 @@ export default function AppTabs() {
         </NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="orders">
+        <NativeTabs.Trigger.Label>Orders</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+
     </NativeTabs>
   );
 }

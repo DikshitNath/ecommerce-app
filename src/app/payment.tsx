@@ -40,7 +40,8 @@ export default function PaymentScreen() {
         router.push({
             pathname: "/payment-processing",
             params: {
-                result: "failure",
+                result: "success",
+                paymentMethod,
             },
         });
     };

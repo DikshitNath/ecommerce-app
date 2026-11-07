@@ -4,11 +4,12 @@ import {
   DefaultTheme,
   ThemeProvider,
   Stack,
-} from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+} from "expo-router";
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import * as SplashScreen from "expo-splash-screen";
+import { useColorScheme } from "react-native";
+
+import { AnimatedSplashOverlay } from "@/components/animated-icon";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,13 +17,13 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider
+      value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+    >
       <AnimatedSplashOverlay />
 
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="checkout" />
-        <Stack.Screen name="payment" />
       </Stack>
     </ThemeProvider>
   );
