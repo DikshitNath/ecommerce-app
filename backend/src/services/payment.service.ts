@@ -17,10 +17,15 @@ export class PaymentServiceError extends Error {
 
 export async function processPayment(
   orderId: string,
+  userId: string,
   outcome: PaymentOutcome
 ): Promise<IOrder> {
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     throw new PaymentServiceError("Invalid order ID.");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new PaymentServiceError("Invalid user ID.", 401);
   }
 
   if (!["SUCCESS", "FAILED"].includes(outcome)) {
@@ -33,7 +38,11 @@ export async function processPayment(
 
   try {
     await session.withTransaction(async () => {
-      const order = await Order.findById(orderId).session(session);
+      // Find the order belonging to the authenticated user only.
+      const order = await Order.findOne({
+        _id: orderId,
+        userId,
+      }).session(session);
 
       if (!order) {
         throw new PaymentServiceError("Order not found.", 404);
@@ -59,6 +68,7 @@ export async function processPayment(
         const failedOrder = await Order.findOneAndUpdate(
           {
             _id: orderId,
+            userId,
             orderStatus: "PENDING",
             paymentStatus: { $ne: "SUCCESS" },
           },
@@ -129,6 +139,7 @@ export async function processPayment(
       const confirmedOrder = await Order.findOneAndUpdate(
         {
           _id: orderId,
+          userId,
           orderStatus: "PENDING",
           paymentStatus: { $ne: "SUCCESS" },
         },

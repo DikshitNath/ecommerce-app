@@ -10,12 +10,19 @@ import {
 } from "../services/order.service";
 
 // POST /api/orders
-export async function createOrder(
-  req: Request,
-  res: Response
-) {
+export async function createOrder(req: Request, res: Response) {
   try {
-    const order = await createPendingOrder(req.body);
+    if (!req.user?.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
+    const order = await createPendingOrder(
+      req.user.userId,
+      req.body
+    );
 
     return res.status(201).json({
       success: true,
@@ -40,11 +47,15 @@ export async function createOrder(
 }
 
 // GET /api/orders
-export async function getOrders(
-  req: Request,
-  res: Response
-) {
+export async function getOrders(req: Request, res: Response) {
   try {
+    if (!req.user?.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
     const page = Math.max(
       1,
       Number.parseInt(req.query.page as string, 10) || 1
@@ -60,14 +71,18 @@ export async function getOrders(
 
     const skip = (page - 1) * limit;
 
+    // Only retrieve orders belonging to the logged-in user.
+    const userId = new mongoose.Types.ObjectId(req.user.userId);
+    const filter = { userId };
+
     const [orders, totalOrders] = await Promise.all([
-      Order.find()
+      Order.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
 
-      Order.countDocuments(),
+      Order.countDocuments(filter),
     ]);
 
     return res.status(200).json({
@@ -92,21 +107,31 @@ export async function getOrders(
 }
 
 // GET /api/orders/:id
-export async function getOrderById(
-  req: Request,
-  res: Response
-) {
+export async function getOrderById(req: Request, res: Response) {
   try {
-    const { id } = req.params;
+    if (!req.user?.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    const id = req.params.id;
+
+    if (
+      typeof id !== "string" ||
+      !mongoose.Types.ObjectId.isValid(id)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Invalid order ID.",
       });
     }
 
-    const order = await Order.findById(id).lean();
+    const order = await Order.findOne({
+      _id: id,
+      userId: new mongoose.Types.ObjectId(req.user.userId),
+    }).lean();
 
     if (!order) {
       return res.status(404).json({

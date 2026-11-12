@@ -1,18 +1,18 @@
 
 import { useState } from "react";
 import {
-    View,
-    Text,
-    Image,
-    ScrollView,
-    Pressable,
     ActivityIndicator,
+    Image,
+    Pressable,
+    ScrollView,
     StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { useProduct } from "@/hooks/use-products";
-import { useCartStore } from "@/stores/cart-store";
+import { useCartStore } from "@/store/cart-store";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function ProductDetailsScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();

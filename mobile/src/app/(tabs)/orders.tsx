@@ -11,6 +11,8 @@ import {
 import { useRouter } from "expo-router";
 import { useOrders } from "../../hooks/use-orders";
 import type { Order } from "../../services/order.service";
+import { useCallback } from "react";
+import { useFocusEffect } from "expo-router";
 
 export default function OrdersScreen() {
   const router = useRouter();
@@ -24,6 +26,12 @@ export default function OrdersScreen() {
     refetch,
     isRefetching,
   } = useOrders(1, 20);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const orders = data?.data ?? [];
 

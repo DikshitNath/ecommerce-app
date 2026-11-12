@@ -10,6 +10,15 @@ export async function processOrderPayment(
   res: Response
 ) {
   try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
     const { orderId, outcome } = req.body;
 
     if (!orderId || typeof orderId !== "string") {
@@ -26,7 +35,11 @@ export async function processOrderPayment(
       });
     }
 
-    const order = await processPayment(orderId, outcome);
+    const order = await processPayment(
+      orderId,
+      userId,
+      outcome
+    );
 
     return res.status(200).json({
       success: true,

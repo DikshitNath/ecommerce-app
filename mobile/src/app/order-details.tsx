@@ -8,9 +8,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 
+import { useCallback } from "react";
+
 import {
   useLocalSearchParams,
   useRouter,
+  useFocusEffect,
 } from "expo-router";
 
 import { useOrder } from "../hooks/use-orders";
@@ -31,6 +34,29 @@ export default function OrderDetailsScreen() {
     ? params.orderId[0]
     : params.orderId;
 
+  if (!orderId) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.emptyTitle}>
+          Invalid Order
+        </Text>
+
+        <Text style={styles.emptyDescription}>
+          No order ID was provided.
+        </Text>
+
+        <Pressable
+          style={styles.actionButton}
+          onPress={() => router.replace("/(tabs)/orders")}
+        >
+          <Text style={styles.actionButtonText}>
+            Back to My Orders
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   // Fetch order details from backend.
   const {
     data: order,
@@ -41,14 +67,22 @@ export default function OrderDetailsScreen() {
     isRefetching,
   } = useOrder(orderId ?? "");
 
+  useFocusEffect(
+    useCallback(() => {
+      if (orderId) {
+        refetch();
+      }
+    }, [orderId, refetch])
+  );
+
   const formatPrice = (price: number) =>
     `₹${price.toLocaleString("en-IN")}`;
 
   const orderDate = order
     ? new Date(order.createdAt).toLocaleString("en-IN", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
+      dateStyle: "medium",
+      timeStyle: "short",
+    })
     : "";
 
   // Order status styling.
@@ -259,9 +293,9 @@ export default function OrderDetailsScreen() {
                   style={[
                     styles.dot,
                     order.paymentStatus === "SUCCESS" &&
-                      styles.activeDot,
+                    styles.activeDot,
                     order.paymentStatus === "FAILED" &&
-                      styles.failedDot,
+                    styles.failedDot,
                   ]}
                 />
 
@@ -269,7 +303,7 @@ export default function OrderDetailsScreen() {
                   style={[
                     styles.line,
                     order.paymentStatus === "SUCCESS" &&
-                      styles.activeLine,
+                    styles.activeLine,
                   ]}
                 />
               </View>
@@ -279,9 +313,9 @@ export default function OrderDetailsScreen() {
                   style={[
                     styles.timelineText,
                     order.paymentStatus === "SUCCESS" &&
-                      styles.activeTimelineText,
+                    styles.activeTimelineText,
                     order.paymentStatus === "FAILED" &&
-                      styles.failedTimelineText,
+                    styles.failedTimelineText,
                   ]}
                 >
                   Payment {order.paymentStatus}
@@ -291,8 +325,8 @@ export default function OrderDetailsScreen() {
                   {order.paymentStatus === "SUCCESS"
                     ? "Payment was successfully processed."
                     : order.paymentStatus === "FAILED"
-                    ? "Payment could not be completed."
-                    : "Waiting for payment confirmation."}
+                      ? "Payment could not be completed."
+                      : "Waiting for payment confirmation."}
                 </Text>
               </View>
             </View>
@@ -303,7 +337,7 @@ export default function OrderDetailsScreen() {
                   style={[
                     styles.dot,
                     order.orderStatus === "CONFIRMED" &&
-                      styles.activeDot,
+                    styles.activeDot,
                   ]}
                 />
               </View>
@@ -313,7 +347,7 @@ export default function OrderDetailsScreen() {
                   style={[
                     styles.timelineText,
                     order.orderStatus === "CONFIRMED" &&
-                      styles.activeTimelineText,
+                    styles.activeTimelineText,
                   ]}
                 >
                   Order Confirmed

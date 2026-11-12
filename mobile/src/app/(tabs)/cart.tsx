@@ -1,15 +1,15 @@
 
 import {
-    View,
-    Text,
     FlatList,
     Pressable,
     StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 import { useRouter } from "expo-router";
-import { useCartStore } from "../../stores/cart-store";
-import type { CartItem } from "../../stores/cart-store";
+import type { CartItem } from "../../store/cart-store";
+import { useCartStore } from "../../store/cart-store";
 
 export default function CartScreen() {
     const items = useCartStore((state) => state.items);

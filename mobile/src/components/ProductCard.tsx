@@ -1,13 +1,13 @@
 
 import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 import { useRouter } from "expo-router";
-import { useCartStore } from "../stores/cart-store";
+import { useCartStore } from "../store/cart-store";
 
 type ProductCardProps = {
   id: string;

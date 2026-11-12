@@ -1,3 +1,4 @@
+
 import { Router } from "express";
 
 import {
@@ -6,7 +7,12 @@ import {
   getOrderById,
 } from "../controllers/order.controller";
 
+import { authenticate } from "../middleware/auth.middleware";
+
 const router = Router();
+
+// All order endpoints require authentication.
+router.use(authenticate);
 
 router.post("/", createOrder);
 

@@ -1,18 +1,18 @@
 
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Alert,
-  ScrollView,
-  ActivityIndicator,
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { useCartStore } from "../stores/cart-store";
 import { useCreateOrder } from "../hooks/use-orders";
+import { useCartStore } from "../store/cart-store";
 
 type PaymentMethod = "UPI" | "CARD" | "COD";
 type PaymentOutcome = "SUCCESS" | "FAILED";

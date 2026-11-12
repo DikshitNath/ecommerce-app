@@ -40,15 +40,18 @@ export class OrderServiceError extends Error {
 }
 
 export async function createPendingOrder(
+  userId: string,
   input: CreateOrderInput
 ): Promise<IOrder> {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new OrderServiceError("Invalid user ID.", 401);
+  }
+
   if (!input.items || input.items.length === 0) {
     throw new OrderServiceError("Cart cannot be empty.");
   }
 
-  if (
-    !["UPI", "CARD", "COD"].includes(input.paymentMethod)
-  ) {
+  if (!["UPI", "CARD", "COD"].includes(input.paymentMethod)) {
     throw new OrderServiceError("Invalid payment method.");
   }
 
@@ -58,10 +61,7 @@ export async function createPendingOrder(
       throw new OrderServiceError("Invalid product ID.");
     }
 
-    if (
-      !Number.isInteger(item.quantity) ||
-      item.quantity <= 0
-    ) {
+    if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
       throw new OrderServiceError(
         "Product quantity must be a positive integer."
       );
@@ -118,7 +118,6 @@ export async function createPendingOrder(
 
   const orderItems = input.items.map((item) => {
     const product = productMap.get(item.productId)!;
-
     const selectedVariants = item.selectedVariants ?? {};
 
     // Validate selected variant names and values.
@@ -129,10 +128,7 @@ export async function createPendingOrder(
         (entry) => entry.name === variantName
       );
 
-      if (
-        !variant ||
-        !variant.options.includes(variantValue)
-      ) {
+      if (!variant || !variant.options.includes(variantValue)) {
         throw new OrderServiceError(
           `Invalid ${variantName} selection for ${product.name}.`
         );
@@ -163,13 +159,12 @@ export async function createPendingOrder(
   const deliveryFee = DELIVERY_FEE;
   const totalAmount = subtotal + deliveryFee;
 
-  // Generate a readable order reference.
   const orderNumber =
     `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-  // Create a pending order only.
-  // Payment confirmation and stock deduction happen later.
+  // Associate the order with the authenticated user.
   const order = await Order.create({
+    userId: new mongoose.Types.ObjectId(userId),
     orderNumber,
     items: orderItems,
     shippingAddress: input.shippingAddress,

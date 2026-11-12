@@ -1,12 +1,12 @@
 
-import { NativeTabs } from 'expo-router/native-tabs';
-import { useColorScheme } from 'react-native';
+import { NativeTabs } from "expo-router/native-tabs";
+import { useColorScheme } from "react-native";
 
-import { Colors } from '@/constants/theme';
+import { Colors } from "@/constants/theme";
 
 export default function AppTabs() {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
 
   return (
     <NativeTabs
@@ -19,7 +19,7 @@ export default function AppTabs() {
           Home
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
+          src={require("@/assets/images/tabIcons/home.png")}
           renderingMode="template"
         />
       </NativeTabs.Trigger>
@@ -29,7 +29,7 @@ export default function AppTabs() {
           Explore
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
+          src={require("@/assets/images/tabIcons/explore.png")}
           renderingMode="template"
         />
       </NativeTabs.Trigger>
@@ -41,9 +41,16 @@ export default function AppTabs() {
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="orders">
-        <NativeTabs.Trigger.Label>Orders</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>
+          Orders
+        </NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="profile">
+        <NativeTabs.Trigger.Label>
+          Profile
+        </NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

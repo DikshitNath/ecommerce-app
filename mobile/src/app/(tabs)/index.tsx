@@ -1,11 +1,11 @@
 
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Pressable,
-  ActivityIndicator,
+    ActivityIndicator,
+    FlatList,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 import { useRouter } from "expo-router";
@@ -13,8 +13,8 @@ import { useRouter } from "expo-router";
 import type { Product } from "../../services/product.service";
 
 import ProductCard from "../../components/ProductCard";
-import { useCartStore } from "../../stores/cart-store";
 import { useProducts } from "../../hooks/use-products";
+import { useCartStore } from "../../store/cart-store";
 
 function HomeHeader() {
   const totalItems = useCartStore((state) =>
