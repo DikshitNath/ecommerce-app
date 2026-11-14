@@ -1,14 +1,15 @@
 
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
+import axios from "axios";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 import { useCreateOrder } from "../hooks/use-orders";
@@ -148,10 +149,19 @@ export default function PaymentScreen() {
     } catch (error) {
       console.error("Order creation failed:", error);
 
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Unable to create your order. Please try again.";
+      let message = "Unable to create your order. Please try again.";
+
+      if (axios.isAxiosError(error)) {
+        console.log("ORDER ERROR STATUS:", error.response?.status);
+        console.log("ORDER ERROR DATA:", error.response?.data);
+
+        message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
 
       Alert.alert("Order Failed", message);
     } finally {
@@ -258,14 +268,14 @@ export default function PaymentScreen() {
               style={[
                 styles.testOption,
                 paymentOutcome === "SUCCESS" &&
-                  styles.selectedTestOption,
+                styles.selectedTestOption,
               ]}
             >
               <Text
                 style={[
                   styles.testOptionText,
                   paymentOutcome === "SUCCESS" &&
-                    styles.selectedTestOptionText,
+                  styles.selectedTestOptionText,
                 ]}
               >
                 Simulate Success
@@ -278,14 +288,14 @@ export default function PaymentScreen() {
               style={[
                 styles.testOption,
                 paymentOutcome === "FAILED" &&
-                  styles.selectedTestOption,
+                styles.selectedTestOption,
               ]}
             >
               <Text
                 style={[
                   styles.testOptionText,
                   paymentOutcome === "FAILED" &&
-                    styles.selectedTestOptionText,
+                  styles.selectedTestOptionText,
                 ]}
               >
                 Simulate Failure
@@ -347,7 +357,7 @@ export default function PaymentScreen() {
           style={[
             styles.payButton,
             (items.length === 0 || isSubmitting) &&
-              styles.disabledButton,
+            styles.disabledButton,
           ]}
           onPress={handlePayment}
           disabled={items.length === 0 || isSubmitting}
