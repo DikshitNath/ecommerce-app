@@ -7,11 +7,14 @@ import {
     Alert,
     ActivityIndicator,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useAuthStore } from "../../store/auth.store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export default function ProfileScreen() {
+    const router = useRouter();
+
     const user = useAuthStore((state) => state.user);
     const status = useAuthStore((state) => state.status);
     const initialize = useAuthStore((state) => state.initialize);
@@ -21,6 +24,9 @@ export default function ProfileScreen() {
     const [isRetrying, setIsRetrying] = useState(false);
 
     const isOffline = status === "offline" || status === "error";
+
+    const isVerifiedAdmin =
+        status === "authenticated" && user?.role === "admin";
 
     const handleRetry = async () => {
         if (isRetrying) return;
@@ -126,7 +132,33 @@ export default function ProfileScreen() {
                 <Text style={styles.email}>
                     {user?.email || "No email available"}
                 </Text>
+
+                {isVerifiedAdmin && (
+                    <View style={styles.adminBadge}>
+                        <Text style={styles.adminBadgeText}>
+                            ADMIN
+                        </Text>
+                    </View>
+                )}
             </View>
+
+            {isVerifiedAdmin && (
+                <TouchableOpacity
+                    style={styles.adminButton}
+                    onPress={() => router.push("/admin")}
+                >
+                    <View>
+                        <Text style={styles.adminButtonTitle}>
+                            Admin Dashboard
+                        </Text>
+                        <Text style={styles.adminButtonSubtitle}>
+                            Manage your store and products
+                        </Text>
+                    </View>
+
+                    <Text style={styles.adminArrow}>{"\u2192"}</Text>
+                </TouchableOpacity>
+            )}
 
             <View style={styles.infoCard}>
                 <Text style={styles.sectionTitle}>
@@ -248,6 +280,42 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#6B7280",
         marginTop: 5,
+    },
+    adminBadge: {
+        backgroundColor: "#DBEAFE",
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+        borderRadius: 20,
+        marginTop: 12,
+    },
+    adminBadgeText: {
+        color: "#1D4ED8",
+        fontSize: 11,
+        fontWeight: "800",
+        letterSpacing: 1,
+    },
+    adminButton: {
+        backgroundColor: "#111827",
+        borderRadius: 14,
+        padding: 18,
+        marginBottom: 20,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
+    adminButtonTitle: {
+        color: "#FFFFFF",
+        fontSize: 16,
+        fontWeight: "700",
+    },
+    adminButtonSubtitle: {
+        color: "#D1D5DB",
+        fontSize: 12,
+        marginTop: 5,
+    },
+    adminArrow: {
+        color: "#FFFFFF",
+        fontSize: 26,
     },
     infoCard: {
         backgroundColor: "#FFFFFF",

@@ -25,6 +25,18 @@ const generateToken = (userId: string): string => {
   return jwt.sign({ userId }, secret, { expiresIn });
 };
 
+const getPublicUser = (user: {
+  _id: { toString(): string };
+  name: string;
+  email: string;
+  role?: string;
+}) => ({
+  id: user._id.toString(),
+  name: user.name,
+  email: user.email,
+  role: user.role === "admin" ? "admin" as const : "customer" as const,
+});
+
 export const registerUser = async (
   name: string,
   email: string,
@@ -45,20 +57,17 @@ export const registerUser = async (
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
+      // Never accept the role from public registration.
+      role: "customer",
     });
 
     const token = generateToken(user._id.toString());
 
     return {
       token,
-      user: {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-      },
+      user: getPublicUser(user),
     };
   } catch (error: unknown) {
-    // Handle duplicate email if two registrations happen simultaneously.
     if (
       typeof error === "object" &&
       error !== null &&
@@ -72,7 +81,10 @@ export const registerUser = async (
   }
 };
 
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (
+  email: string,
+  password: string
+) => {
   const normalizedEmail = email.trim().toLowerCase();
 
   const user = await User.findOne({
@@ -83,7 +95,10 @@ export const loginUser = async (email: string, password: string) => {
     throw new AuthServiceError("Invalid email or password", 401);
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isPasswordValid = await bcrypt.compare(
+    password,
+    user.password
+  );
 
   if (!isPasswordValid) {
     throw new AuthServiceError("Invalid email or password", 401);
@@ -93,10 +108,6 @@ export const loginUser = async (email: string, password: string) => {
 
   return {
     token,
-    user: {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-    },
+    user: getPublicUser(user),
   };
 };

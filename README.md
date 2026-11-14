@@ -81,50 +81,62 @@ ecommerce-app/
 │
 ├── mobile/
 │   ├── src/
+│   │   ├── __tests__/                      # Automated Mobile Test Suites (22 tests)
+│   │   │   ├── setup.ts                    # In-memory AsyncStorage & SecureStore mocks
+│   │   │   ├── cart-store.test.ts          # Cart & aggregate stock limit validation
+│   │   │   ├── checkout-validation.test.ts # Address, PIN & Indian phone validation
+│   │   │   ├── payment-acceptance.test.ts  # Acceptance tests: server verification & retry
+│   │   │   └── offline-resilience.test.ts  # Offline resilience & timeout recovery
 │   │   ├── app/
 │   │   │   ├── (tabs)/
-│   │   │   │   ├── index.tsx
-│   │   │   │   ├── explore.tsx
-│   │   │   │   ├── cart.tsx
-│   │   │   │   ├── orders.tsx
+│   │   │   │   ├── index.tsx               # Product discovery & category browsing
+│   │   │   │   ├── explore.tsx             # Product search & category filters
+│   │   │   │   ├── cart.tsx                # Cart management & stock caps
+│   │   │   │   ├── orders.tsx              # Order history with live status
+│   │   │   │   ├── profile.tsx             # User profile, offline mode & logout
 │   │   │   │   └── _layout.tsx
-│   │   │   │
-│   │   │   ├── product-details.tsx
-│   │   │   ├── checkout.tsx
-│   │   │   ├── payment.tsx
-│   │   │   ├── payment-processing.tsx
-│   │   │   ├── payment-success.tsx
-│   │   │   ├── payment-failure.tsx
-│   │   │   ├── order-details.tsx
-│   │   │   └── _layout.tsx
-│   │   │
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   └── stores/
-│   │
+│   │   │   ├── login.tsx                   # User login screen
+│   │   │   ├── register.tsx                # User registration screen
+│   │   │   ├── product-details.tsx         # Product variants & availability
+│   │   │   ├── checkout.tsx                # Shipping address & order total
+│   │   │   ├── payment.tsx                 # Payment methods & simulation options
+│   │   │   ├── payment-processing.tsx      # Processing indicator & backend dispatch
+│   │   │   ├── payment-success.tsx         # Verified order confirmation & cart clear
+│   │   │   ├── payment-failure.tsx         # Failure handling, cart preserve & retry
+│   │   │   ├── order-details.tsx           # Detailed order view
+│   │   │   └── _layout.tsx                 # Protected route navigation guard
+│   │   ├── components/                     # UI components (ProductCard, Tabs, etc.)
+│   │   ├── hooks/                          # React Query hooks (useProducts, useOrders)
+│   │   ├── services/                       # API services (api, auth, order, product)
+│   │   └── store/                          # Zustand stores (cart, auth, order)
 │   └── package.json
 │
 ├── backend/
 │   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── data/
-│   │   ├── middleware/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── app.ts
-│   │   ├── server.ts
-│   │   └── seed.ts
-│   │
+│   │   ├── __tests__/                      # Automated Backend Test Suites (41 tests)
+│   │   │   ├── admin.authorization.test.ts # Admin role access, customer 403 & JWT checks
+│   │   │   ├── auth.middleware.test.ts     # Bearer token verification & 401 handling
+│   │   │   ├── auth.service.test.ts        # Registration, hashing & JWT generation
+│   │   │   ├── order.service.test.ts       # Server pricing, stock & variant validation
+│   │   │   ├── payment.service.test.ts     # Atomic stock deduction & idempotency
+│   │   │   └── product.crud.test.ts        # Product CRUD, validation & soft delete
+│   │   ├── config/                         # Database connection
+│   │   ├── controllers/                    # Express request controllers
+│   │   ├── data/                           # Seed product catalog
+│   │   ├── middleware/                     # Auth & admin middleware
+│   │   ├── models/                         # Mongoose models (User, Product, Order)
+│   │   ├── routes/                         # Express API routes
+│   │   ├── services/                       # Business logic services
+│   │   ├── app.ts                          # Express application configuration
+│   │   ├── server.ts                       # Server startup script
+│   │   └── seed.ts                         # Database seeding script
 │   └── package.json
 │
-├── docs/
-├── screenshots/
-├── demo/
 ├── .gitignore
-└── README.md
+├── AGENTS.md
+├── LICENSE
+├── README.md
+└── requirements.docx
 ```
 
 ## Getting Started
@@ -304,6 +316,9 @@ cd mobile
 # TypeScript validation
 npx tsc --noEmit
 
+# Run automated test suites (22 tests)
+npm test
+
 # Start Expo
 npx expo start --clear
 ```
@@ -316,6 +331,9 @@ cd backend
 # TypeScript validation
 npx tsc --noEmit
 
+# Run automated test suites (41 tests)
+npm test
+
 # Start development server
 npm run dev
 ```
@@ -326,18 +344,18 @@ npm run dev
 |---|---|
 | Product catalog APIs | Implemented |
 | Product browsing and search | Implemented |
-| Product variants | Implemented |
-| Cart management | Implemented |
-| Cart persistence | Implemented |
-| Backend order creation | Implemented |
+| Product variants & aggregate stock limits | Implemented |
+| Cart management & persistence | Implemented |
+| User authentication (JWT + SecureStore) | Implemented |
+| Backend order creation & server totals | Implemented |
 | Order listing and details APIs | Implemented |
-| Backend payment processing | Implemented |
-| Mobile checkout integration | In progress |
-| Mobile payment integration | In progress |
-| Payment success/failure verification | In progress |
-| Authentication and user ownership | Planned |
-| Automated testing | Planned |
-| Final APK and documentation | Planned |
+| Backend payment processing (Simulated) | Implemented |
+| Mobile checkout integration & address validation | Implemented |
+| Mobile payment integration & retry flow | Implemented |
+| Payment success/failure verification & stock deduction | Implemented |
+| Offline resilience & error handling | Implemented |
+| Automated testing (63 unit & integration tests) | Implemented |
+| Final APK and documentation | In progress |
 
 ## Important Notes
 

@@ -33,6 +33,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   const status = useAuthStore((state) => state.status);
+  const user = useAuthStore((state) => state.user);
   const initialize = useAuthStore((state) => state.initialize);
   const markBackendOffline = useAuthStore(
     (state) => state.markBackendOffline
@@ -42,6 +43,10 @@ export default function RootLayout() {
 
   const isAuthenticated =
     status === "authenticated" || status === "offline";
+
+  // Only a currently verified admin can access admin routes.
+  const isVerifiedAdmin =
+    status === "authenticated" && user?.role === "admin";
 
   // Restore the saved authentication session.
   useEffect(() => {
@@ -93,7 +98,6 @@ export default function RootLayout() {
       }
     };
 
-    // Check immediately, then every 15 seconds.
     checkServer();
 
     const interval = setInterval(checkServer, 15000);
@@ -125,6 +129,12 @@ export default function RootLayout() {
               <Stack.Screen name="payment-failure" />
               <Stack.Screen name="order-details" />
               <Stack.Screen name="api-test" />
+            </Stack.Protected>
+
+            <Stack.Protected guard={isVerifiedAdmin}>
+              <Stack.Screen name="admin" />
+              <Stack.Screen name="admin-add-product" />
+              <Stack.Screen name="admin-edit-product" />
             </Stack.Protected>
           </Stack>
         )}

@@ -56,3 +56,57 @@ export const getProductById = async (
 
   return response.data.data;
 };
+
+
+export interface ProductInput {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  images: string[];
+  stock: number;
+  sku: string;
+  variants: ProductVariant[];
+}
+
+interface SingleProductResponse {
+  success: boolean;
+  message: string;
+  data: Product;
+}
+
+// Admin: Create a product
+export const createProduct = async (
+  payload: ProductInput
+): Promise<Product> => {
+  const response = await api.post<SingleProductResponse>(
+    "/products",
+    payload
+  );
+
+  return response.data.data;
+};
+
+// Admin: Update a product
+export const updateProduct = async (
+  id: string,
+  payload: Partial<ProductInput>
+): Promise<Product> => {
+  const response = await api.put<SingleProductResponse>(
+    `/products/${id}`,
+    payload
+  );
+
+  return response.data.data;
+};
+
+// Admin: Soft-delete a product
+export const deleteProduct = async (
+  id: string
+): Promise<Product> => {
+  const response = await api.delete<SingleProductResponse>(
+    `/products/${id}`
+  );
+
+  return response.data.data;
+};

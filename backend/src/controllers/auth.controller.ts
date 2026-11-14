@@ -1,6 +1,7 @@
 
 import { Request, Response } from "express";
 import { z } from "zod";
+
 import {
   AuthServiceError,
   registerUser,
@@ -100,7 +101,6 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getCurrentUser = async (
   req: Request,
   res: Response
@@ -116,7 +116,7 @@ export const getCurrentUser = async (
     }
 
     const user = await User.findById(userId).select(
-      "_id name email createdAt"
+      "_id name email role createdAt"
     );
 
     if (!user) {
@@ -133,6 +133,7 @@ export const getCurrentUser = async (
         id: user._id.toString(),
         name: user.name,
         email: user.email,
+        role: user.role === "admin" ? "admin" : "customer",
         createdAt: user.createdAt,
       },
     });

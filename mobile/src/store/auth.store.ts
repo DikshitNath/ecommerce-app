@@ -10,6 +10,7 @@ import {
   AuthUser,
   RegisterInput,
   LoginInput,
+  UserRole,
 } from "../services/auth.service";
 
 type AuthStatus =
@@ -35,6 +36,36 @@ interface AuthState {
 const TOKEN_KEY = "auth_token";
 const USER_KEY = "auth_user";
 
+// Normalize old cached profiles and protect against malformed data.
+const normalizeUser = (value: unknown): AuthUser | null => {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const user = value as Record<string, unknown>;
+
+  if (
+    typeof user.id !== "string" ||
+    typeof user.name !== "string" ||
+    typeof user.email !== "string"
+  ) {
+    return null;
+  }
+
+  const role: UserRole =
+    user.role === "admin" ? "admin" : "customer";
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role,
+    ...(typeof user.createdAt === "string"
+      ? { createdAt: user.createdAt }
+      : {}),
+  };
+};
+
 const getErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
     return (
@@ -50,9 +81,15 @@ const getErrorMessage = (error: unknown): string => {
 };
 
 const saveUser = async (user: AuthUser) => {
+  const normalizedUser = normalizeUser(user);
+
+  if (!normalizedUser) {
+    throw new Error("Invalid user profile received from server.");
+  }
+
   await SecureStore.setItemAsync(
     USER_KEY,
-    JSON.stringify(user)
+    JSON.stringify(normalizedUser)
   );
 };
 
@@ -62,7 +99,7 @@ const getSavedUser = async (): Promise<AuthUser | null> => {
 
     if (!savedUser) return null;
 
-    return JSON.parse(savedUser) as AuthUser;
+    return normalizeUser(JSON.parse(savedUser));
   } catch {
     return null;
   }
@@ -83,12 +120,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       const result = await registerApi(payload);
+      const user = normalizeUser(result.user);
+
+      if (!user) {
+        throw new Error("Invalid user profile received from server.");
+      }
 
       await SecureStore.setItemAsync(TOKEN_KEY, result.token);
-      await saveUser(result.user);
+      await saveUser(user);
 
       set({
-        user: result.user,
+        user,
         status: "authenticated",
         error: null,
       });
@@ -107,12 +149,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       const result = await loginApi(payload);
+      const user = normalizeUser(result.user);
+
+      if (!user) {
+        throw new Error("Invalid user profile received from server.");
+      }
 
       await SecureStore.setItemAsync(TOKEN_KEY, result.token);
-      await saveUser(result.user);
+      await saveUser(user);
 
       set({
-        user: result.user,
+        user,
         status: "authenticated",
         error: null,
       });
@@ -129,7 +176,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async () => {
     const currentStatus = get().status;
 
-    // Keep the existing screen mounted during background verification.
+    // Keep existing screens mounted during background verification.
     if (currentStatus !== "offline" && currentStatus !== "error") {
       set({ status: "loading", error: null });
     }
@@ -148,10 +195,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      // Verify the saved token with the backend.
-      const user = await getCurrentUser();
+      // Always refresh the profile and role from the backend.
+      const user = normalizeUser(await getCurrentUser());
 
-      // Refresh the cached profile after successful verification.
+      if (!user) {
+        throw new Error("Invalid user profile received from server.");
+      }
+
       await saveUser(user);
 
       set({
@@ -164,7 +214,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         ? error.response?.status
         : undefined;
 
-      // A rejected or invalid session must be cleared.
       if (statusCode === 401 || statusCode === 404) {
         await clearSession();
 
@@ -176,14 +225,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      // Network/server failure: restore the cached profile if available.
       const cachedUser = await getSavedUser();
 
       if (cachedUser) {
         set({
           user: cachedUser,
           status: "offline",
-          error: "Unable to verify your session. Some features may be unavailable until you reconnect.",
+          error:
+            "Unable to verify your session. Some features may be unavailable until you reconnect.",
         });
         return;
       }
@@ -199,8 +248,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   markBackendOffline: () => {
     const currentState = get();
 
-    // Only switch an existing authenticated session to offline.
-    if (currentState.status === "authenticated" && currentState.user) {
+    if (
+      currentState.status === "authenticated" &&
+      currentState.user
+    ) {
       set({
         status: "offline",
         error: "Backend server is currently unavailable.",
