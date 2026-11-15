@@ -1,5 +1,14 @@
 # ShopEase – E-Commerce Android Mobile Application
 
+![React Native](https://img.shields.io/badge/React_Native-0.88.1-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Expo](https://img.shields.io/badge/Expo_SDK-58-000020?style=flat-square&logo=expo&logoColor=white)
+![Android](https://img.shields.io/badge/Android-API_24+-34A853?style=flat-square&logo=android&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22_LTS-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-v5-000000?style=flat-square&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB_Atlas-9.0-47A248?style=flat-square&logo=mongodb&logoColor=white)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-CDN-3448C5?style=flat-square&logo=cloudinary&logoColor=white)
+
 ShopEase is a full-stack, mobile-first e-commerce shopping application built for Android using **React Native, Expo (SDK 58), TypeScript, Node.js, Express.js (v5), MongoDB, and Cloudinary CDN**.
 
 The application delivers an end-to-end shopping journey from product discovery and variant selection to server-validated checkout, simulated payment processing, live order tracking, and an administrative store management portal with cloud-hosted product image storage.
@@ -14,8 +23,8 @@ The application delivers an end-to-end shopping journey from product discovery a
 4. [Prerequisites & Minimum Android Version](#prerequisites--minimum-android-version)
 5. [Environment Configuration & Variables](#environment-configuration--variables)
 6. [Live Production Deployment & Health Endpoint](#live-production-deployment--health-endpoint)
-7. [Backend Setup & Database Configuration](#backend-setup--database-configuration)
-8. [Product Seeding & Test Accounts](#product-seeding--test-accounts)
+7. [Evaluator Demo Credentials & Verification](#evaluator-demo-credentials--verification)
+8. [Backend Setup & Database Configuration](#backend-setup--database-configuration)
 9. [Running the Application](#running-the-application)
 10. [Automated Testing & Quality Verification](#automated-testing--quality-verification)
 11. [Release APK Generation & Installation Guide](#release-apk-generation--installation-guide)
@@ -24,6 +33,7 @@ The application delivers an end-to-end shopping journey from product discovery a
 14. [Clean Android Installation & Demonstration Walkthrough](#clean-android-installation--demonstration-walkthrough)
 15. [Known Limitations](#known-limitations)
 16. [Project Directory Structure](#project-directory-structure)
+17. [AI Usage, Attribution & Submission Declarations](#ai-usage-attribution--submission-declarations)
 
 ---
 
@@ -213,6 +223,33 @@ Expected Response:
 
 ---
 
+## Evaluator Demo Credentials & Verification
+
+The release APK is pre-configured to communicate with the live production backend on Render (`https://shopease-backend-s8xj.onrender.com/api`). Evaluators can log in immediately with the verified credentials below or register a fresh customer account:
+
+| Account Role | Email Address | Password | Privileges & Accessible Features |
+|---|---|---|---|
+| **Administrator** *(Pre-Configured & Verified)* | `test@example.com` | `Test12345` | Full access to Admin Dashboard, Cloudinary product creation and editing, image deletion, live customer orders feed, real-time debounced order search, and status filtering (`PENDING`, `CONFIRMED`, `FAILED`). |
+| **Customer** *(Self-Service Registration)* | *Any valid email* (e.g. `evaluator@example.com`) | *Min 8 characters* (e.g. `Password123!`) | Public product catalog browsing, variant selection, persistent cart, address validation, simulated payment flow, and live order tracking. |
+
+### Evaluation Verification Note
+The production admin account has been verified live against the Render deployment:
+- **`POST /api/auth/login`**: `200 OK` — Valid JWT session token issued.
+- **`GET /api/auth/me`**: `200 OK` — Verified `role: "admin"` confirmed from database profile.
+- **`GET /api/orders/admin`**: `200 OK` — Admin authorization guard passed (`requireAdmin`).
+- **Security Check (Negative Control)**: Unauthenticated requests to `/api/orders/admin` return `401 Unauthorized`.
+
+> [!TIP]
+> **Customer Self-Service Registration**: Evaluators do not need pre-existing customer credentials. Tap **Register** on the mobile app's login screen to create a customer account in seconds. All self-registered users are assigned `role: "customer"` by default.
+>
+> **Promoting Any Account to Admin**: If evaluating a local backend instance, an account can be promoted to admin using `mongosh`:
+> ```javascript
+> use ecommerce;
+> db.users.updateOne({ email: "your_email@example.com" }, { $set: { role: "admin" } });
+> ```
+
+---
+
 ## Backend Setup & Database Configuration
 
 1. Navigate to the backend directory and install dependencies:
@@ -229,54 +266,16 @@ Expected Response:
    ```
    The backend will start on `http://localhost:5000`.
 
-4. Verify local health check:
+4. Seed the synthetic product catalog:
+   ```bash
+   npm run seed
+   ```
+   Output: `Sample products seeded successfully`
+
+5. Verify local health check:
    ```bash
    curl http://localhost:5000/api/health
    ```
-
----
-
-## Product Seeding & Test Accounts
-
-### 1. Seeding Sample Products
-The backend includes a dedicated seeding script that populates the database with synthetic catalog data (complete with variants, pricing, inventory, categories, and image URLs):
-
-```bash
-cd backend
-npm run seed
-```
-
-Output:
-```text
-Sample products seeded successfully
-```
-
-### 2. Creating Test Accounts
-
-Real passwords are never hardcoded or committed to version control.
-
-#### A. Customer Account (Self-Service)
-1. Launch the mobile application.
-2. Tap the **Register** link on the login screen.
-3. Enter your desired test details (e.g. Name: `Test Customer`, Email: `customer@example.com`, Password: `Password123!`).
-4. Tap **Register**. Passwords are encrypted using bcrypt (12 salt rounds) and the account is created with default `role: "customer"`.
-
-#### B. Administrator Account (Secure Promotion)
-ShopEase prevents public registration from granting admin privileges. To create an admin account:
-
-1. Register an account using the normal registration flow (e.g. Email: `admin@example.com`, Password: `AdminPassword123!`).
-2. Promote the user's role to `"admin"` directly in MongoDB:
-   - **Using MongoDB Shell (`mongosh`)**:
-     ```javascript
-     use ecommerce;
-     db.users.updateOne(
-       { email: "admin@example.com" },
-       { $set: { role: "admin" } }
-     );
-     ```
-   - **Using MongoDB Atlas / Compass UI**:
-     Navigate to the `users` collection, locate the document for `admin@example.com`, and update the field `"role": "admin"`.
-3. Log in with this account in the mobile app. The **Profile** screen will display the `ADMIN` badge and the **Admin Dashboard** entry point.
 
 ---
 
@@ -416,6 +415,28 @@ Ensure your Android device has **USB Debugging** enabled:
    adb shell am start -n com.shopease.app/.MainActivity
    ```
 
+### Direct APK Sideloading (Without ADB)
+
+Evaluators installing and testing the APK directly on an Android smartphone:
+1. Transfer `app-release.apk` to your phone (via USB file transfer, Google Drive, or browser download).
+2. Open the **Files** or **Downloads** app on your phone and tap `app-release.apk`.
+3. If prompted with *"For your security, your phone is not allowed to install unknown apps from this source"*, tap **Settings** and enable **Allow from this source**.
+4. Tap **Install**, then tap **Open**.
+5. The application will launch and connect directly to the live production backend on Render without needing any local server setup.
+
+### Clean Installation & State Reset
+
+To evaluate the application from a clean state (clearing previously stored tokens, user profile, or cached cart items):
+- **Via Android Settings**:
+  1. Open Android **Settings** > **Apps** > **ShopEase**.
+  2. Tap **Storage & cache**.
+  3. Tap **Clear storage** (or **Clear data**).
+  4. Launch ShopEase to start from a completely clean onboarding state.
+- **Via ADB Command Line**:
+  ```bash
+  adb shell pm clear com.shopease.app
+  ```
+
 ---
 
 ## Security, Persistence & Offline Resilience
@@ -517,8 +538,10 @@ Follow these steps to evaluate the application on a clean Android device or emul
 11. Navigate to the **Orders** tab to inspect the confirmed order receipt.
 
 ### Step 3: Administrator Demonstration
-1. Promote an account to `"admin"` in MongoDB (`role: "admin"`).
-2. Log in with the admin account. Navigate to **Profile** and observe the `ADMIN` badge.
+1. Log in with the pre-configured evaluator admin credentials:
+   - **Email**: `test@example.com`
+   - **Password**: `Test12345`
+2. Navigate to **Profile** and observe the `ADMIN` badge.
 3. Tap **Admin Dashboard**:
    - Tap **Product Management**: View active products, tap **Add Product**, select gallery photos, inspect preview thumbnails, remove an image, fill details, and submit. Uploaded images are stored persistently in Cloudinary.
    - Tap **Orders**: View all customer orders. Test real-time debounced search by typing customer name, email, or order number. Switch filter pills between `ALL`, `PENDING`, `CONFIRMED`, `FAILED`.
@@ -533,8 +556,13 @@ Follow these steps to evaluate the application on a clean Android device or emul
 
 ## Known Limitations
 
-1. **Simulated Payment Gateway**: Payments are currently processed via simulated sandbox outcomes (`SUCCESS` / `FAILED`) to fulfill assessment requirements without charging real bank accounts. No live banking gateway (e.g. Razorpay or Stripe) is connected.
-2. **Cash on Delivery (COD)**: Checkout currently operates exclusively on the electronic payment workflow; Cash on Delivery order handling is not implemented.
+To maintain a robust, reliable, and test-covered MVP within the assessment timeline, the following features are intentionally out of scope:
+
+1. **Simulated Payment Gateway**: Payments are processed via a two-phase simulated sandbox workflow (`SUCCESS` / `FAILED`) to satisfy evaluation requirements without charging actual bank accounts. No commercial payment gateway (e.g. Razorpay or Stripe) is connected. *(Verified in `backend/src/controllers/payment.controller.ts` & `backend/src/services/payment.service.ts`)*.
+2. **Cash on Delivery (COD)**: Checkout currently operates exclusively on the electronic payment simulation workflow; Cash on Delivery order creation is not implemented. *(Verified in `mobile/src/app/checkout.tsx`)*.
+3. **Password Self-Recovery**: Automated email password reset (`/forgot-password`) is not implemented; password storage and validation are handled securely via bcrypt with 12 salt rounds. *(Verified in `backend/src/routes/auth.routes.ts`)*.
+4. **Push Notifications**: Live delivery status push notifications (e.g. Firebase Cloud Messaging or Expo Push Notifications) are not connected; order status updates are retrieved dynamically via REST APIs with pull-to-refresh. *(Verified in `mobile/src/app/(tabs)/orders.tsx`)*.
+5. **Customer Order Cancellation**: Customers cannot cancel confirmed orders post-payment; order status modifications (`PENDING`, `CONFIRMED`, `FAILED`) are managed administratively via the Admin Orders portal. *(Verified in `mobile/src/app/order-details.tsx`)*.
 
 ---
 
@@ -652,12 +680,55 @@ ecommerce-app/
 │   ├── .gitignore                          # Git ignore rules (uploads & env ignored)
 │   └── package.json                        # Backend dependencies & test scripts
 │
+├── docs/                                   # Evaluator technical specifications & testing evidence
+│   ├── diagrams/                           # Application architecture & ERD Mermaid diagrams
+│   ├── sample-data/                        # Synthetic JSON datasets (products, users, orders)
+│   ├── test-evidence/                      # Freshly executed test evidence & test suite logs
+│   ├── API_DOCUMENTATION.md                # Comprehensive REST API specifications
+│   ├── API_TESTING.md                      # Repeatable curl commands for all endpoints
+│   ├── CLEAN_INSTALL_AND_BUILD.md          # Clean clone, run, and APK build guide
+│   ├── TECHNICAL_NOTE.md                   # Evaluator technical note on storage, A11y & release
+│   └── TESTING.md                          # Quality assurance & reproduction guide
+│
 ├── .gitignore                              # Root repository ignore rules
 ├── AGENTS.md                               # Project development guidelines
 ├── LICENSE                                 # MIT License
 ├── README.md                               # Comprehensive documentation & audit guide
 └── requirements.docx                       # Original assessment brief
 ```
+
+---
+
+## AI Usage, Attribution & Submission Declarations
+
+**Candidate**: Dikshit Nath<br>
+**Internship Role**: Android & Mobile App Development<br>
+**Assessment Organization**: ALGIONS AI LABS PRIVATE LIMITED<br>
+**Assigned Project**: E-Commerce Shopping Android Application (ShopEase)
+
+## AI Usage and Attribution
+
+In accordance with ALGIONS AI LABS submission expectations, AI tools were used as development assistants during the implementation, testing, debugging, and documentation of ShopEase.
+
+- **ChatGPT (OpenAI):** Used during the initial development phase for architectural brainstorming, user journey planning, requirement analysis, technical guidance, and debugging assistance.
+
+- **Antigravity (Google DeepMind):** Used as an AI-assisted development environment for:
+  - Assisting with the development and refinement of unit and integration tests (92 backend tests and 55 mobile tests).
+  - Reviewing TypeScript code through strict type-checking (`tsc --noEmit`) and assisting with ESLint configuration.
+  - Assisting with Cloudinary streaming memory upload implementation and binary image signature (magic-byte) verification.
+  - Debugging and improving Android safe-area handling, keyboard input behavior, and bottom navigation styling.
+  - Assisting with Gradle release APK build execution (`.\gradlew.bat assembleRelease`) and physical Android device testing through ADB.
+  - Verifying production API connectivity and authentication on Render.
+  - Reviewing and improving project documentation.
+
+### Developer Responsibility and Verification
+
+AI tools were used to assist the development process, not replace developer understanding or responsibility. Generated suggestions and code were reviewed, integrated, and tested as part of the project workflow. I take responsibility for the submitted implementation and can explain its architecture, functionality, technical decisions, and limitations.
+
+### Declarations
+- **Code Ownership & Understanding**: All mobile screens, state stores, backend routes, services, and tests are thoroughly understood and ready to be explained during the technical walkthrough and live debugging session.
+- **Zero Real Secrets**: No live payment credentials, personal user data, private JWT keys, or MongoDB/Cloudinary passwords are committed to version control.
+- **Link & Endpoint Integrity**: All links, endpoints, test commands, and build scripts have been validated.
 
 ---
 

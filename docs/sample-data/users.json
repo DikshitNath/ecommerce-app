@@ -1,0 +1,22 @@
+[
+  {
+    "_id": "6737c0004a2e1d0012ac0001",
+    "name": "Jane Sample Customer",
+    "email": "customer.sample@example.com",
+    "password": "[REDACTED_SYNTHETIC_RECORD_NOT_A_REAL_CREDENTIAL]",
+    "role": "customer",
+    "createdAt": "2026-11-15T09:00:00.000Z",
+    "updatedAt": "2026-11-15T09:00:00.000Z",
+    "_illustrativeNotice": "Synthetic customer record demonstrating database schema format. Safe for direct MongoDB insertion and order relationship testing. For local login testing, replace placeholder password with a standard bcrypt hash (e.g. via bcrypt.hash('Password123!', 12))."
+  },
+  {
+    "_id": "6737c0004a2e1d0012ac0002",
+    "name": "Alex Sample Administrator",
+    "email": "admin.sample@example.com",
+    "password": "[REDACTED_SYNTHETIC_RECORD_NOT_A_REAL_CREDENTIAL]",
+    "role": "admin",
+    "createdAt": "2026-11-15T08:00:00.000Z",
+    "updatedAt": "2026-11-15T08:00:00.000Z",
+    "_illustrativeNotice": "Synthetic administrator record demonstrating elevated role schema format. Safe for direct MongoDB insertion and order relationship testing. For local login testing, replace placeholder password with a standard bcrypt hash (e.g. via bcrypt.hash('Password123!', 12))."
+  }
+]

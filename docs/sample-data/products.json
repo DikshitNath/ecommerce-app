@@ -1,0 +1,118 @@
+[
+  {
+    "_id": "6737b1004a2e1d0012ab0001",
+    "name": "AeroStride Pro Running Shoes",
+    "description": "Lightweight performance running shoes with breathable mesh and responsive cushioning.",
+    "price": 4499,
+    "category": "Footwear",
+    "images": [
+      "https://placehold.co/800x800/222222/ffffff/png?text=AeroStride+Pro+Running+Shoes+1",
+      "https://placehold.co/800x800/222222/ffffff/png?text=AeroStride+Pro+Running+Shoes+2"
+    ],
+    "stock": 30,
+    "sku": "FOOT-AERO-001",
+    "variants": [
+      {
+        "name": "Size",
+        "options": ["8", "9", "10", "11"]
+      },
+      {
+        "name": "Color",
+        "options": ["Stealth Black", "Electric Blue"]
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-11-15T10:00:00.000Z",
+    "updatedAt": "2026-11-15T10:00:00.000Z"
+  },
+  {
+    "_id": "6737b1004a2e1d0012ab0002",
+    "name": "SonicBeats Wireless ANC Headphones",
+    "description": "Over-ear noise-cancelling headphones featuring 40mm drivers and 35-hour playback.",
+    "price": 6999,
+    "category": "Electronics",
+    "images": [
+      "https://placehold.co/800x800/1e293b/ffffff/png?text=SonicBeats+ANC+Headphones+1",
+      "https://placehold.co/800x800/1e293b/ffffff/png?text=SonicBeats+ANC+Headphones+2"
+    ],
+    "stock": 18,
+    "sku": "ELEC-SONIC-002",
+    "variants": [
+      {
+        "name": "Color",
+        "options": ["Matte Black", "Silver Gray"]
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-11-15T10:15:00.000Z",
+    "updatedAt": "2026-11-15T10:15:00.000Z"
+  },
+  {
+    "_id": "6737b1004a2e1d0012ab0003",
+    "name": "UrbanFit Organic Cotton Crewneck T-Shirt",
+    "description": "100% GOTS certified combed organic cotton t-shirt tailored for all-day comfort.",
+    "price": 899,
+    "category": "Fashion",
+    "images": [
+      "https://placehold.co/800x800/0f172a/ffffff/png?text=UrbanFit+Cotton+TShirt+1"
+    ],
+    "stock": 75,
+    "sku": "FASH-URBAN-003",
+    "variants": [
+      {
+        "name": "Size",
+        "options": ["S", "M", "L", "XL", "XXL"]
+      },
+      {
+        "name": "Color",
+        "options": ["Sage Green", "Charcoal", "Off White"]
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-11-15T10:30:00.000Z",
+    "updatedAt": "2026-11-15T10:30:00.000Z"
+  },
+  {
+    "_id": "6737b1004a2e1d0012ab0004",
+    "name": "ApexTitan Chrono Smartwatch",
+    "description": "AMOLED fitness smartwatch with blood oxygen monitor, titanium bezel and GPS tracking.",
+    "price": 11499,
+    "category": "Accessories",
+    "images": [
+      "https://placehold.co/800x800/334155/ffffff/png?text=ApexTitan+Smartwatch+1",
+      "https://placehold.co/800x800/334155/ffffff/png?text=ApexTitan+Smartwatch+2"
+    ],
+    "stock": 12,
+    "sku": "ACCS-APEX-004",
+    "variants": [
+      {
+        "name": "Strap",
+        "options": ["Black Silicone", "Brown Leather"]
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-11-15T10:45:00.000Z",
+    "updatedAt": "2026-11-15T10:45:00.000Z"
+  },
+  {
+    "_id": "6737b1004a2e1d0012ab0005",
+    "name": "HydroTherma Insulated Stainless Steel Tumbler",
+    "description": "Double-wall vacuum insulated 750ml tumbler that keeps beverages cold for 24h or hot for 12h.",
+    "price": 1299,
+    "category": "Home & Living",
+    "images": [
+      "https://placehold.co/800x800/475569/ffffff/png?text=HydroTherma+Tumbler+1"
+    ],
+    "stock": 50,
+    "sku": "HOME-HYDRO-005",
+    "variants": [
+      {
+        "name": "Finish",
+        "options": ["Matte Black", "Ocean Teal", "Blush Pink"]
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2026-11-15T11:00:00.000Z",
+    "updatedAt": "2026-11-15T11:00:00.000Z"
+  }
+]

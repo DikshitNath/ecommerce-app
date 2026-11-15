@@ -1,0 +1,123 @@
+[
+  {
+    "_id": "6737d0004a2e1d0012ad0001",
+    "userId": "6737c0004a2e1d0012ac0001",
+    "orderNumber": "ORD-1731698888000-101",
+    "items": [
+      {
+        "productId": "6737b1004a2e1d0012ab0001",
+        "name": "AeroStride Pro Running Shoes",
+        "sku": "FOOT-AERO-001",
+        "price": 4499,
+        "quantity": 1,
+        "selectedVariants": {
+          "Size": "10",
+          "Color": "Stealth Black"
+        }
+      },
+      {
+        "productId": "6737b1004a2e1d0012ab0003",
+        "name": "UrbanFit Organic Cotton Crewneck T-Shirt",
+        "sku": "FASH-URBAN-003",
+        "price": 899,
+        "quantity": 2,
+        "selectedVariants": {
+          "Size": "L",
+          "Color": "Sage Green"
+        }
+      }
+    ],
+    "shippingAddress": {
+      "fullName": "Jane Sample Customer",
+      "phone": "9876543210",
+      "addressLine": "Flat 402, Green Heights, MG Road",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "postalCode": "560001"
+    },
+    "subtotal": 6297,
+    "deliveryFee": 40,
+    "totalAmount": 6337,
+    "paymentMethod": "UPI",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "createdAt": "2026-11-15T12:00:00.000Z",
+    "updatedAt": "2026-11-15T12:00:00.000Z"
+  },
+  {
+    "_id": "6737d0004a2e1d0012ad0002",
+    "userId": "6737c0004a2e1d0012ac0001",
+    "orderNumber": "ORD-1731698888000-202",
+    "items": [
+      {
+        "productId": "6737b1004a2e1d0012ab0002",
+        "name": "SonicBeats Wireless ANC Headphones",
+        "sku": "ELEC-SONIC-002",
+        "price": 6999,
+        "quantity": 1,
+        "selectedVariants": {
+          "Color": "Matte Black"
+        }
+      },
+      {
+        "productId": "6737b1004a2e1d0012ab0005",
+        "name": "HydroTherma Insulated Stainless Steel Tumbler",
+        "sku": "HOME-HYDRO-005",
+        "price": 1299,
+        "quantity": 1,
+        "selectedVariants": {
+          "Finish": "Ocean Teal"
+        }
+      }
+    ],
+    "shippingAddress": {
+      "fullName": "Jane Sample Customer",
+      "phone": "9876543210",
+      "addressLine": "Flat 402, Green Heights, MG Road",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "postalCode": "560001"
+    },
+    "subtotal": 8298,
+    "deliveryFee": 40,
+    "totalAmount": 8338,
+    "paymentMethod": "CARD",
+    "paymentStatus": "SUCCESS",
+    "orderStatus": "CONFIRMED",
+    "createdAt": "2026-11-15T12:30:00.000Z",
+    "updatedAt": "2026-11-15T12:32:00.000Z"
+  },
+  {
+    "_id": "6737d0004a2e1d0012ad0003",
+    "userId": "6737c0004a2e1d0012ac0001",
+    "orderNumber": "ORD-1731698888000-303",
+    "items": [
+      {
+        "productId": "6737b1004a2e1d0012ab0004",
+        "name": "ApexTitan Chrono Smartwatch",
+        "sku": "ACCS-APEX-004",
+        "price": 11499,
+        "quantity": 1,
+        "selectedVariants": {
+          "Strap": "Black Silicone"
+        }
+      }
+    ],
+    "shippingAddress": {
+      "fullName": "Jane Sample Customer",
+      "phone": "9876543210",
+      "addressLine": "Flat 402, Green Heights, MG Road",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "postalCode": "560001"
+    },
+    "subtotal": 11499,
+    "deliveryFee": 40,
+    "totalAmount": 11539,
+    "paymentMethod": "CARD",
+    "paymentStatus": "FAILED",
+    "orderStatus": "PENDING",
+    "createdAt": "2026-11-15T13:00:00.000Z",
+    "updatedAt": "2026-11-15T13:02:00.000Z"
+  }
+]
