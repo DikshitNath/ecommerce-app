@@ -1,7 +1,7 @@
 
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
-import axios from "axios";
+import { isAxiosError } from "axios";
 
 import {
   registerUser as registerApi,
@@ -67,7 +67,7 @@ const normalizeUser = (value: unknown): AuthUser | null => {
 };
 
 const getErrorMessage = (error: unknown): string => {
-  if (axios.isAxiosError(error)) {
+  if (isAxiosError(error)) {
     return (
       error.response?.data?.message ||
       error.message ||
@@ -210,7 +210,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         error: null,
       });
     } catch (error) {
-      const statusCode = axios.isAxiosError(error)
+      const statusCode = isAxiosError(error)
         ? error.response?.status
         : undefined;
 

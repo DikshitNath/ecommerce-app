@@ -1,4 +1,5 @@
 
+import { useCallback } from "react";
 import {
   View,
   Text,
@@ -7,24 +8,22 @@ import {
   Pressable,
   ActivityIndicator,
 } from "react-native";
-
-import { useCallback } from "react";
-
 import {
   useLocalSearchParams,
   useRouter,
   useFocusEffect,
 } from "expo-router";
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ScreenHeader } from "../components/ScreenHeader";
 import { useOrder } from "../hooks/use-orders";
 import type {
-  Order,
   OrderStatus,
   PaymentStatus,
 } from "../services/order.service";
 
 export default function OrderDetailsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const params = useLocalSearchParams<{
     orderId: string;
@@ -33,6 +32,24 @@ export default function OrderDetailsScreen() {
   const orderId = Array.isArray(params.orderId)
     ? params.orderId[0]
     : params.orderId;
+
+  // Fetch order details from backend.
+  const {
+    data: order,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+  } = useOrder(orderId ?? "");
+
+  useFocusEffect(
+    useCallback(() => {
+      if (orderId) {
+        refetch();
+      }
+    }, [orderId, refetch])
+  );
 
   if (!orderId) {
     return (
@@ -56,24 +73,6 @@ export default function OrderDetailsScreen() {
       </View>
     );
   }
-
-  // Fetch order details from backend.
-  const {
-    data: order,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    isRefetching,
-  } = useOrder(orderId ?? "");
-
-  useFocusEffect(
-    useCallback(() => {
-      if (orderId) {
-        refetch();
-      }
-    }, [orderId, refetch])
-  );
 
   const formatPrice = (price: number) =>
     `₹${price.toLocaleString("en-IN")}`;
@@ -174,7 +173,7 @@ export default function OrderDetailsScreen() {
         </Text>
 
         <Text style={styles.emptyDescription}>
-          We couldn't find this order.
+          We couldn&apos;t find this order.
         </Text>
 
         <Pressable onPress={() => router.back()}>
@@ -187,28 +186,34 @@ export default function OrderDetailsScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
-      <View style={styles.headingRow}>
-        <Text style={styles.heading}>
-          Order Details
-        </Text>
+    <View style={styles.container}>
+      <ScreenHeader
+        title="Order Details"
+        subtitle={order.orderNumber}
+        showBack
+        onBack={() => router.replace("/(tabs)/orders")}
+        rightElement={
+          <Pressable
+            onPress={() => refetch()}
+            disabled={isRefetching}
+            style={styles.refreshButton}
+          >
+            {isRefetching ? (
+              <ActivityIndicator size="small" color="#2563EB" />
+            ) : (
+              <Text style={styles.refreshText}>↻ Refresh</Text>
+            )}
+          </Pressable>
+        }
+      />
 
-        <Pressable
-          onPress={() => refetch()}
-          disabled={isRefetching}
-        >
-          {isRefetching ? (
-            <ActivityIndicator color="#2563EB" />
-          ) : (
-            <Text style={styles.refreshText}>
-              Refresh
-            </Text>
-          )}
-        </Pressable>
-      </View>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: 40 + insets.bottom },
+        ]}
+      >
 
       {/* Order Information */}
       <View style={styles.card}>
@@ -511,7 +516,8 @@ export default function OrderDetailsScreen() {
           Back to My Orders
         </Text>
       </Pressable>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -539,9 +545,19 @@ const styles = StyleSheet.create({
     color: "#0F172A",
   },
 
+  refreshButton: {
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+
   refreshText: {
     color: "#2563EB",
-    fontWeight: "600",
+    fontWeight: "700",
+    fontSize: 13,
   },
 
   card: {

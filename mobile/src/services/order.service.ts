@@ -31,9 +31,17 @@ export interface ShippingAddress {
   postalCode: string;
 }
 
+export interface OrderCustomer {
+  _id?: string;
+  name?: string;
+  email?: string;
+}
+
 export interface Order {
   _id: string;
   orderNumber: string;
+  userId?: OrderCustomer | string;
+  customer?: OrderCustomer;
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   subtotal: number;
@@ -129,6 +137,40 @@ export const processOrderPayment = async (
       orderId,
       outcome,
     }
+  );
+
+  return response.data.data;
+};
+
+// Retrieve all customer orders (Admin only)
+export const getAdminOrders = async (
+  page = 1,
+  limit = 10,
+  status?: string,
+  search?: string
+): Promise<OrdersResponse> => {
+  const params: Record<string, unknown> = { page, limit };
+  if (status && status !== "ALL") {
+    params.status = status;
+  }
+  if (search && search.trim()) {
+    params.search = search.trim();
+  }
+
+  const response = await api.get<OrdersResponse>(
+    "/orders/admin",
+    { params }
+  );
+
+  return response.data;
+};
+
+// Retrieve specific order details (Admin only)
+export const getAdminOrderById = async (
+  orderId: string
+): Promise<Order> => {
+  const response = await api.get<OrderResponse>(
+    `/orders/admin/${orderId}`
   );
 
   return response.data.data;

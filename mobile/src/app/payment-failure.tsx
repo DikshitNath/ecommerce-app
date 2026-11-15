@@ -6,7 +6,9 @@ import {
   StyleSheet,
   Pressable,
   Alert,
+  ScrollView,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useRouter, useLocalSearchParams } from "expo-router";
 
@@ -14,6 +16,7 @@ type PaymentOutcome = "success" | "failure";
 
 export default function PaymentFailureScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const {
     orderId,
@@ -61,7 +64,17 @@ export default function PaymentFailureScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[
+        styles.container,
+        {
+          paddingTop: Math.max(insets.top, 24) + 12,
+          paddingBottom: Math.max(insets.bottom, 24) + 16,
+        },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.icon}>✕</Text>
 
       <Text style={styles.heading}>
@@ -165,13 +178,16 @@ export default function PaymentFailureScreen() {
           Return to Cart
         </Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
+  container: {
     justifyContent: "center",
     alignItems: "center",
     padding: 24,

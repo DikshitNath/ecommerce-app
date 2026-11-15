@@ -6,7 +6,9 @@ import {
   StyleSheet,
   Text,
   View,
+  ScrollView,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
 
@@ -15,6 +17,7 @@ import { useCartStore } from "../store/cart-store";
 
 export default function PaymentSuccessScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const { orderId } = useLocalSearchParams<{
     orderId?: string;
@@ -26,7 +29,6 @@ export default function PaymentSuccessScreen() {
     data: order,
     isLoading,
     isError,
-    error,
     refetch,
     isFetching,
   } = useOrder(orderId ?? "");
@@ -75,7 +77,7 @@ export default function PaymentSuccessScreen() {
         </Text>
 
         <Text style={styles.description}>
-          We couldn't identify your order. Please check your
+          We couldn&apos;t identify your order. Please check your
           order history before trying again.
         </Text>
 
@@ -123,7 +125,7 @@ export default function PaymentSuccessScreen() {
         </Text>
 
         <Text style={styles.description}>
-          We couldn't retrieve your order details. Your cart
+          We couldn&apos;t retrieve your order details. Your cart
           has not been cleared. Please try again or check
           your order history.
         </Text>
@@ -194,7 +196,17 @@ export default function PaymentSuccessScreen() {
 
   // Success UI: only displayed after backend verification.
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[
+        styles.container,
+        {
+          paddingTop: Math.max(insets.top, 24) + 12,
+          paddingBottom: Math.max(insets.bottom, 24) + 16,
+        },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.icon}>✓</Text>
 
       <Text style={styles.heading}>
@@ -277,16 +289,19 @@ export default function PaymentSuccessScreen() {
           Continue Shopping
         </Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
+  container: {
     justifyContent: "center",
     alignItems: "center",
-    padding: 28,
+    paddingHorizontal: 24,
     backgroundColor: "#F8FAFC",
   },
 

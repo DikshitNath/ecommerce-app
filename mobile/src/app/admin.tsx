@@ -9,6 +9,7 @@ import {
     View,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useProducts } from "@/hooks/use-products";
 import type { Product } from "@/services/product.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import { deleteProduct } from "@/services/product.service";
 
 export default function AdminScreen() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
 
     const queryClient = useQueryClient();
 
@@ -147,13 +149,36 @@ export default function AdminScreen() {
     };
 
     return (
-        <View style={styles.container}>
+        <View
+            style={[
+                styles.container,
+                { paddingTop: Math.max(insets.top, 14) + 6 },
+            ]}
+        >
             <View style={styles.header}>
-                <View>
+                <View style={{ flex: 1 }}>
                     <Text style={styles.heading}>Admin Dashboard</Text>
                     <Text style={styles.subtitle}>Manage your ShopEase store</Text>
                 </View>
 
+                <View style={styles.headerButtons}>
+                    <TouchableOpacity
+                        style={styles.ordersHeaderButton}
+                        onPress={() => router.push("/admin-orders")}
+                    >
+                        <Text style={styles.ordersHeaderButtonText}>📦 Orders</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
+                        <Text style={styles.backButtonText}>Back</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            <View style={styles.topActionsBar}>
                 <TouchableOpacity
                     style={styles.addProductButton}
                     onPress={() => router.push("/admin-add-product")}
@@ -162,10 +187,10 @@ export default function AdminScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
+                    style={styles.manageOrdersBannerButton}
+                    onPress={() => router.push("/admin-orders")}
                 >
-                    <Text style={styles.backButtonText}>Back</Text>
+                    <Text style={styles.manageOrdersBannerButtonText}>View Customer Orders →</Text>
                 </TouchableOpacity>
             </View>
 
@@ -195,7 +220,10 @@ export default function AdminScreen() {
                         keyExtractor={(item) => item._id}
                         renderItem={renderProduct}
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.listContent}
+                        contentContainerStyle={[
+                            styles.listContent,
+                            { paddingBottom: Math.max(insets.bottom, 20) + 20 },
+                        ]}
                         refreshControl={
                             <RefreshControl
                                 refreshing={isRefetching}
@@ -272,8 +300,7 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F9FAFB",
-        paddingTop: 60,
+        backgroundColor: "#F8FAFC",
     },
     header: {
         paddingHorizontal: 20,
@@ -440,6 +467,44 @@ const styles = StyleSheet.create({
         fontWeight: "700",
     },
 
+    headerButtons: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    ordersHeaderButton: {
+        backgroundColor: "#2563EB",
+        paddingHorizontal: 12,
+        paddingVertical: 9,
+        borderRadius: 9,
+    },
+    ordersHeaderButtonText: {
+        color: "#FFFFFF",
+        fontWeight: "700",
+        fontSize: 13,
+    },
+    topActionsBar: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 20,
+        paddingBottom: 16,
+        gap: 12,
+    },
+    manageOrdersBannerButton: {
+        backgroundColor: "#EFF6FF",
+        borderWidth: 1,
+        borderColor: "#BFDBFE",
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 9,
+        marginTop: 12,
+    },
+    manageOrdersBannerButtonText: {
+        color: "#2563EB",
+        fontWeight: "700",
+        fontSize: 13,
+    },
     addProductButton: {
         backgroundColor: "#2563EB",
         paddingHorizontal: 14,

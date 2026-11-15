@@ -1,6 +1,5 @@
 
 import { useMemo, useEffect, useState } from "react";
-
 import {
   Alert,
   FlatList,
@@ -13,10 +12,11 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import { useCartStore } from "../store/cart-store";
+import { ScreenHeader } from "../components/ScreenHeader";
 
 const DELIVERY_FEE = 40;
 const ADDRESS_KEY = "shipping_address";
@@ -41,6 +41,7 @@ const EMPTY_ADDRESS: ShippingAddress = {
 
 export default function CheckoutScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const items = useCartStore((state) => state.items);
 
@@ -215,57 +216,66 @@ export default function CheckoutScreen() {
   );
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.cartItemId}
-        contentContainerStyle={styles.listContent}
-        keyboardShouldPersistTaps="handled"
-        renderItem={({ item }: { item: (typeof items)[number] }) => (
-          <View style={styles.productRow}>
-            <View style={styles.productInfo}>
-              <Text style={styles.productName}>
-                {item.name}
-              </Text>
+    <View style={styles.container}>
+      <ScreenHeader
+        title="Checkout"
+        subtitle="Delivery & order review"
+        showBack
+        onBack={() => router.back()}
+      />
 
-              <Text style={styles.quantity}>
-                Quantity: {item.quantity}
-              </Text>
-
-              {(
-                Object.entries(
-                  item.selectedVariants ?? {}
-                ) as [string, string][]
-              ).map(([name, value]) => (
-                <Text key={name} style={styles.variant}>
-                  {name}: {value}
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.cartItemId}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingBottom: items.length > 0 ? 100 : 30 },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          renderItem={({ item }: { item: (typeof items)[number] }) => (
+            <View style={styles.productRow}>
+              <View style={styles.productInfo}>
+                <Text style={styles.productName}>
+                  {item.name}
                 </Text>
-              ))}
 
-              <Text style={styles.unitPrice}>
-                Unit price: ₹{item.price.toLocaleString("en-IN")}
+                <Text style={styles.quantity}>
+                  Quantity: {item.quantity}
+                </Text>
+
+                {(
+                  Object.entries(
+                    item.selectedVariants ?? {}
+                  ) as [string, string][]
+                ).map(([name, value]) => (
+                  <Text key={name} style={styles.variant}>
+                    {name}: {value}
+                  </Text>
+                ))}
+
+                <Text style={styles.unitPrice}>
+                  Unit price: ₹{item.price.toLocaleString("en-IN")}
+                </Text>
+              </View>
+
+              <Text style={styles.productPrice}>
+                ₹{(
+                  item.price * item.quantity
+                ).toLocaleString("en-IN")}
               </Text>
             </View>
-
-            <Text style={styles.productPrice}>
-              ₹{(
-                item.price * item.quantity
-              ).toLocaleString("en-IN")}
-            </Text>
-          </View>
-        )}
-        ListHeaderComponent={
-          <View>
-            <Text style={styles.heading}>Checkout</Text>
-
-            {/* Delivery Address Form */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>
-                Delivery Address
-              </Text>
+          )}
+          ListHeaderComponent={
+            <View>
+              {/* Delivery Address Form */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>
+                  Delivery Address
+                </Text>
 
               {isAddressLoading ? (
                 <ActivityIndicator
@@ -394,7 +404,12 @@ export default function CheckoutScreen() {
 
       {/* Bottom Checkout Button */}
       {items.length > 0 && (
-        <View style={styles.bottomContainer}>
+        <View
+          style={[
+            styles.bottomContainer,
+            { paddingBottom: Math.max(insets.bottom, 16) },
+          ]}
+        >
           <View>
             <Text style={styles.bottomLabel}>
               Estimated Total
@@ -424,7 +439,8 @@ export default function CheckoutScreen() {
           </Pressable>
         </View>
       )}
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -432,6 +448,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8FAFC",
+  },
+  keyboardContainer: {
+    flex: 1,
   },
   listContent: {
     padding: 20,

@@ -6,6 +6,8 @@ import {
   getOrders,
   getOrderById,
   processOrderPayment,
+  getAdminOrders,
+  getAdminOrderById,
 } from "../services/order.service";
 
 import type {
@@ -25,6 +27,16 @@ export const orderKeys = {
 
   detail: (orderId: string) =>
     [...orderKeys.details(), orderId] as const,
+
+  adminLists: () => [...orderKeys.all, "admin", "list"] as const,
+
+  adminList: (page: number, limit: number, status?: string, search?: string) =>
+    [...orderKeys.adminLists(), { page, limit, status, search }] as const,
+
+  adminDetails: () => [...orderKeys.all, "admin", "detail"] as const,
+
+  adminDetail: (orderId: string) =>
+    [...orderKeys.adminDetails(), orderId] as const,
 };
 
 // Fetch order history
@@ -41,6 +53,24 @@ export function useOrder(orderId: string) {
   return useQuery({
     queryKey: orderKeys.detail(orderId),
     queryFn: () => getOrderById(orderId),
+    enabled: Boolean(orderId),
+  });
+}
+
+// Fetch all customer orders (Admin only)
+export function useAdminOrders(page = 1, limit = 10, status = "ALL", search = "") {
+  return useQuery({
+    queryKey: orderKeys.adminList(page, limit, status, search),
+    queryFn: () => getAdminOrders(page, limit, status, search),
+    staleTime: 15 * 1000,
+  });
+}
+
+// Fetch individual order details (Admin only)
+export function useAdminOrder(orderId: string) {
+  return useQuery({
+    queryKey: orderKeys.adminDetail(orderId),
+    queryFn: () => getAdminOrderById(orderId),
     enabled: Boolean(orderId),
   });
 }

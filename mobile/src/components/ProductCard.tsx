@@ -8,6 +8,7 @@ import {
 
 import { useRouter } from "expo-router";
 import { useCartStore } from "../store/cart-store";
+import ProductImage from "./ProductImage";
 
 type ProductCardProps = {
   id: string;
@@ -16,6 +17,7 @@ type ProductCardProps = {
   description: string;
   stock: number;
   hasVariants: boolean;
+  images?: string[];
 };
 
 export default function ProductCard({
@@ -25,6 +27,7 @@ export default function ProductCard({
   description,
   stock,
   hasVariants,
+  images = [],
 }: ProductCardProps) {
   const router = useRouter();
 
@@ -75,8 +78,11 @@ export default function ProductCard({
       price,
       description,
       stock,
+      images,
     });
   };
+
+  const primaryImage = images.length > 0 ? images[0] : null;
 
   return (
     <View style={styles.card}>
@@ -88,6 +94,12 @@ export default function ProductCard({
           })
         }
       >
+        <ProductImage
+          uri={primaryImage}
+          style={styles.cardImage}
+          resizeMode="cover"
+        />
+
         <Text style={styles.name}>{name}</Text>
 
         <Text style={styles.price}>
@@ -187,73 +199,110 @@ export default function ProductCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 15,
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardImage: {
+    width: "100%",
+    height: 190,
+    borderRadius: 10,
+    marginBottom: 12,
+    backgroundColor: "#F1F5F9",
   },
   name: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#0F172A",
+    lineHeight: 22,
   },
   price: {
     fontSize: 20,
     color: "#2563EB",
-    marginTop: 10,
+    fontWeight: "800",
+    marginTop: 8,
   },
   description: {
-    color: "gray",
-    marginTop: 5,
+    color: "#64748B",
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 6,
   },
   stock: {
     color: "#16A34A",
     marginTop: 8,
-    fontSize: 13,
+    fontSize: 12,
+    fontWeight: "600",
   },
   outOfStock: {
     color: "#DC2626",
+    fontWeight: "700",
   },
   detailsLink: {
     color: "#2563EB",
     marginTop: 10,
+    fontSize: 13,
     fontWeight: "600",
   },
   addButton: {
     backgroundColor: "#2563EB",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginTop: 14,
     alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
-    color: "white",
-    fontWeight: "bold",
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 14,
   },
   disabledButton: {
-    backgroundColor: "#CBD5E1",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 15,
+    backgroundColor: "#F1F5F9",
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 14,
     alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
   disabledText: {
-    color: "#475569",
-    fontWeight: "bold",
+    color: "#94A3B8",
+    fontWeight: "700",
+    fontSize: 14,
   },
   quantityContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 15,
-    marginTop: 15,
+    gap: 16,
+    marginTop: 14,
   },
   quantityButton: {
-    padding: 10,
-    backgroundColor: "#E5E7EB",
-    borderRadius: 5,
+    width: 38,
+    height: 38,
+    backgroundColor: "#F1F5F9",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    justifyContent: "center",
+    alignItems: "center",
   },
   quantity: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#0F172A",
+    minWidth: 24,
+    textAlign: "center",
   },
   variantNote: {
     color: "#64748B",
@@ -263,6 +312,7 @@ const styles = StyleSheet.create({
   limitText: {
     color: "#DC2626",
     fontSize: 12,
+    fontWeight: "600",
     marginTop: 8,
   },
 });

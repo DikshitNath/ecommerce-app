@@ -1,7 +1,7 @@
 
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import axios from "axios";
+import { isAxiosError } from "axios";
 import {
   ActivityIndicator,
   Alert,
@@ -11,6 +11,8 @@ import {
   Text,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ScreenHeader } from "../components/ScreenHeader";
 
 import { useCreateOrder } from "../hooks/use-orders";
 import { useCartStore } from "../store/cart-store";
@@ -31,6 +33,7 @@ type ShippingAddress = {
 
 export default function PaymentScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const { shippingAddress } = useLocalSearchParams<{
     shippingAddress?: string;
@@ -151,7 +154,7 @@ export default function PaymentScreen() {
 
       let message = "Unable to create your order. Please try again.";
 
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         console.log("ORDER ERROR STATUS:", error.response?.status);
         console.log("ORDER ERROR DATA:", error.response?.data);
 
@@ -170,63 +173,16 @@ export default function PaymentScreen() {
     }
   };
 
-  const PaymentOption = ({
-    title,
-    description,
-    value,
-    disabled = false,
-  }: {
-    title: string;
-    description: string;
-    value: PaymentMethod;
-    disabled?: boolean;
-  }) => {
-    const selected = paymentMethod === value;
-
-    return (
-      <Pressable
-        onPress={() => {
-          if (!disabled) {
-            setPaymentMethod(value);
-          }
-        }}
-        disabled={disabled || isSubmitting}
-        style={[
-          styles.paymentOption,
-          selected && styles.selectedOption,
-          disabled && styles.disabledOption,
-        ]}
-      >
-        <View style={styles.optionContent}>
-          <View style={styles.radioOuter}>
-            {selected && <View style={styles.radioInner} />}
-          </View>
-
-          <View style={styles.optionText}>
-            <Text style={styles.optionTitle}>
-              {title}
-            </Text>
-
-            <Text style={styles.optionDescription}>
-              {description}
-            </Text>
-          </View>
-
-          {disabled && (
-            <Text style={styles.comingSoon}>
-              Soon
-            </Text>
-          )}
-        </View>
-      </Pressable>
-    );
-  };
-
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.heading}>Payment</Text>
+      <ScreenHeader
+        title="Payment"
+        subtitle="Select payment method"
+        showBack
+        onBack={() => router.back()}
+      />
 
+      <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.sectionTitle}>
           Select Payment Method
         </Text>
@@ -235,12 +191,18 @@ export default function PaymentScreen() {
           title="UPI"
           description="Pay using Google Pay, PhonePe or Paytm"
           value="UPI"
+          selected={paymentMethod === "UPI"}
+          isSubmitting={isSubmitting}
+          onSelect={setPaymentMethod}
         />
 
         <PaymentOption
           title="Credit / Debit Card"
           description="Visa, Mastercard and RuPay"
           value="CARD"
+          selected={paymentMethod === "CARD"}
+          isSubmitting={isSubmitting}
+          onSelect={setPaymentMethod}
         />
 
         <PaymentOption
@@ -248,6 +210,9 @@ export default function PaymentScreen() {
           description="Currently unavailable"
           value="COD"
           disabled
+          selected={paymentMethod === "COD"}
+          isSubmitting={isSubmitting}
+          onSelect={setPaymentMethod}
         />
 
         {/* Sandbox payment testing */}
@@ -342,7 +307,12 @@ export default function PaymentScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.bottomContainer}>
+      <View
+        style={[
+          styles.bottomContainer,
+          { paddingBottom: Math.max(insets.bottom, 16) },
+        ]}
+      >
         <View>
           <Text style={styles.bottomLabel}>
             Estimated Amount
@@ -372,6 +342,55 @@ export default function PaymentScreen() {
         </Pressable>
       </View>
     </View>
+  );
+}
+
+interface PaymentOptionProps {
+  title: string;
+  description: string;
+  value: PaymentMethod;
+  disabled?: boolean;
+  selected: boolean;
+  isSubmitting: boolean;
+  onSelect: (value: PaymentMethod) => void;
+}
+
+function PaymentOption({
+  title,
+  description,
+  value,
+  disabled = false,
+  selected,
+  isSubmitting,
+  onSelect,
+}: PaymentOptionProps) {
+  return (
+    <Pressable
+      onPress={() => {
+        if (!disabled) {
+          onSelect(value);
+        }
+      }}
+      disabled={disabled || isSubmitting}
+      style={[
+        styles.paymentOption,
+        selected && styles.selectedOption,
+        disabled && styles.disabledOption,
+      ]}
+    >
+      <View style={styles.optionContent}>
+        <View style={styles.radioOuter}>
+          {selected && <View style={styles.radioInner} />}
+        </View>
+
+        <View style={styles.optionText}>
+          <Text style={styles.optionTitle}>{title}</Text>
+          <Text style={styles.optionDescription}>{description}</Text>
+        </View>
+
+        {disabled && <Text style={styles.comingSoon}>Soon</Text>}
+      </View>
+    </Pressable>
   );
 }
 

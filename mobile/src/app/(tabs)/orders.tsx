@@ -8,14 +8,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useOrders } from "../../hooks/use-orders";
 import type { Order } from "../../services/order.service";
 import { useCallback } from "react";
-import { useFocusEffect } from "expo-router";
 
 export default function OrdersScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   // Fetch orders directly from the backend.
   const {
@@ -226,23 +227,32 @@ export default function OrdersScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: Math.max(insets.top, 14) + 6 },
+      ]}
+    >
       <View style={styles.headingContainer}>
-        <Text style={styles.heading}>
-          My Orders
-        </Text>
+        <View>
+          <Text style={styles.heading}>My Orders</Text>
+          <Text style={styles.subtitle}>
+            Track and review your purchases
+          </Text>
+        </View>
 
         <Pressable
           onPress={() => refetch()}
           disabled={isRefetching}
-          style={styles.refreshButton}
+          style={({ pressed }) => [
+            styles.refreshButton,
+            pressed && styles.buttonPressed,
+          ]}
         >
           {isRefetching ? (
-            <ActivityIndicator color="#2563EB" />
+            <ActivityIndicator size="small" color="#2563EB" />
           ) : (
-            <Text style={styles.refreshText}>
-              Refresh
-            </Text>
+            <Text style={styles.refreshText}>↻ Refresh</Text>
           )}
         </Pressable>
       </View>
@@ -251,30 +261,32 @@ export default function OrdersScreen() {
         data={orders}
         keyExtractor={(item) => item._id}
         renderItem={renderOrder}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: 80 + insets.bottom },
+        ]}
         refreshing={isRefetching}
         onRefresh={refetch}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>
-              📦
-            </Text>
+            <View style={styles.emptyIconCircle}>
+              <Text style={styles.emptyIcon}>📦</Text>
+            </View>
 
-            <Text style={styles.emptyTitle}>
-              No Orders Yet
-            </Text>
+            <Text style={styles.emptyTitle}>No Orders Yet</Text>
 
             <Text style={styles.emptyDescription}>
               Your purchases will appear here once you place an order.
             </Text>
 
             <Pressable
-              style={styles.shopButton}
+              style={({ pressed }) => [
+                styles.shopButton,
+                pressed && styles.buttonPressed,
+              ]}
               onPress={() => router.replace("/")}
             >
-              <Text style={styles.shopButtonText}>
-                Start Shopping
-              </Text>
+              <Text style={styles.shopButtonText}>Start Shopping</Text>
             </Pressable>
           </View>
         }
@@ -294,7 +306,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8FAFC",
-    paddingTop: 20,
   },
 
   headingContainer: {
@@ -302,28 +313,54 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    marginBottom: 18,
+    marginBottom: 16,
   },
 
   heading: {
     fontSize: 26,
-    fontWeight: "bold",
+    fontWeight: "800",
     color: "#0F172A",
+    letterSpacing: -0.5,
+  },
+
+  subtitle: {
+    fontSize: 12,
+    color: "#64748B",
+    marginTop: 2,
   },
 
   refreshButton: {
-    padding: 8,
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
   },
 
   refreshText: {
     color: "#2563EB",
-    fontWeight: "600",
+    fontWeight: "700",
+    fontSize: 13,
   },
 
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 30,
     flexGrow: 1,
+  },
+
+  buttonPressed: {
+    opacity: 0.8,
+  },
+
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#EFF6FF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
   },
 
   orderCard: {

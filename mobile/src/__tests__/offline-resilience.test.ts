@@ -1,7 +1,7 @@
 import "./setup";
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import axios from "axios";
+import { isAxiosError } from "axios";
 
 describe("Mobile Offline Resilience & Error Recovery", () => {
   it("should detect network failure without crashing and distinguish offline state", async () => {
@@ -34,7 +34,7 @@ describe("Mobile Offline Resilience & Error Recovery", () => {
 
   it("should extract user-friendly error message from Axios error without throwing unhandled exceptions", () => {
     const getErrorMessage = (error: unknown): string => {
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         return (
           error.response?.data?.message ||
           error.message ||

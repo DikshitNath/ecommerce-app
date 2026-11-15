@@ -1,5 +1,7 @@
 // Polyfills and mocks for React Native / Expo environment in Node.js test runner
 
+(global as any).__DEV__ = false;
+
 // 1. In-memory storage mock for AsyncStorage
 export const mockAsyncStorage = new Map<string, string>();
 
@@ -12,6 +14,8 @@ export const mockAsyncStorage = new Map<string, string>();
 
 (global as any).window = {
   localStorage: (global as any).localStorage,
+  addEventListener: () => {},
+  removeEventListener: () => {},
 };
 
 // 2. In-memory storage mock for Expo SecureStore

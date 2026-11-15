@@ -1,108 +1,140 @@
-
 import {
-    ActivityIndicator,
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
-
 import { useRouter } from "expo-router";
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Product } from "../../services/product.service";
-
 import ProductCard from "../../components/ProductCard";
 import { useProducts } from "../../hooks/use-products";
 import { useCartStore } from "../../store/cart-store";
+import { TabIcon } from "../../components/TabIcon";
+import { Colors } from "../../constants/theme";
 
 function HomeHeader() {
+  const insets = useSafeAreaInsets();
   const totalItems = useCartStore((state) =>
-    state.items.reduce(
-      (total, item) => total + item.quantity,
-      0
-    )
+    state.items.reduce((total, item) => total + item.quantity, 0)
   );
-
   const router = useRouter();
 
   return (
-    <View>
+    <View style={{ paddingTop: Math.max(insets.top, 14) + 6 }}>
+      {/* Top App Bar */}
       <View style={styles.header}>
-        <Text style={styles.logo}>ShopEase</Text>
+        <View>
+          <Text style={styles.logo}>ShopEase</Text>
+          <Text style={styles.storeTagline}>Quality shopping made simple</Text>
+        </View>
 
         <Pressable
+          style={({ pressed }) => [
+            styles.cartHeaderButton,
+            pressed && styles.buttonPressed,
+          ]}
           onPress={() => router.push("/cart")}
           accessibilityRole="button"
           accessibilityLabel="Open shopping cart"
         >
-          <Text style={{ fontSize: 24 }}>🛒 {totalItems}</Text>
+          <TabIcon
+            name="cart"
+            color={Colors.light.primary}
+            focused={false}
+            size={20}
+            badgeCount={totalItems}
+          />
+          <Text style={styles.cartCountText}>{totalItems}</Text>
         </Pressable>
       </View>
 
-      <View style={styles.welcome}>
-        <Text style={styles.heading}>Discover Products</Text>
-        <Text style={styles.subtitle}>
-          Find everything you need.
-        </Text>
-      </View>
-
+      {/* Hero Welcome Banner */}
       <View style={styles.banner}>
+        <View style={styles.bannerBadge}>
+          <Text style={styles.bannerBadgeText}>LIMITED OFFER</Text>
+        </View>
         <Text style={styles.bannerTitle}>Summer Sale!</Text>
-        <Text style={styles.bannerText}>
-          Get up to 50% off
+        <Text style={styles.bannerSubtitle}>
+          Get up to 50% off selected trending styles
         </Text>
 
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Shop Now</Text>
+        <Pressable
+          style={({ pressed }) => [
+            styles.bannerButton,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={() => router.push("/explore")}
+        >
+          <Text style={styles.bannerButtonText}>Shop Now →</Text>
         </Pressable>
       </View>
 
-      <Text style={styles.sectionTitle}>Categories</Text>
+      {/* Categories Section */}
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitle}>Categories</Text>
+        <Pressable onPress={() => router.push("/explore")}>
+          <Text style={styles.seeAllText}>See All</Text>
+        </Pressable>
+      </View>
 
       <View style={styles.categories}>
-        {["Fashion", "Electronics", "Shoes", "Watches"].map(
-          (category) => (
-            <Pressable key={category} style={styles.category}>
-              <Text>{category}</Text>
-            </Pressable>
-          )
-        )}
+        {["Fashion", "Electronics", "Shoes", "Watches"].map((category) => (
+          <Pressable
+            key={category}
+            style={({ pressed }) => [
+              styles.categoryChip,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={() =>
+              router.push({
+                pathname: "/explore",
+              })
+            }
+          >
+            <Text style={styles.categoryChipText}>{category}</Text>
+          </Pressable>
+        ))}
       </View>
 
-      <Text style={styles.sectionTitle}>
-        Popular Products
-      </Text>
+      {/* Popular Products Header */}
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitle}>Popular Products</Text>
+      </View>
     </View>
   );
 }
 
 export default function HomeScreen() {
-  const { data: products, isLoading, isError, refetch } =
-    useProducts();
+  const insets = useSafeAreaInsets();
+  const { data: products, isLoading, isError, refetch } = useProducts();
 
   if (isLoading) {
     return (
-      <View style={styles.center}>
+      <View
+        style={[
+          styles.center,
+          { paddingTop: Math.max(insets.top, 20) + 40 },
+        ]}
+      >
         <ActivityIndicator size="large" color="#2563EB" />
-        <Text style={styles.statusText}>
-          Loading products...
-        </Text>
+        <Text style={styles.statusText}>Loading products...</Text>
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>
-          Unable to load products.
-        </Text>
-
-        <Pressable
-          style={styles.retryButton}
-          onPress={() => refetch()}
-        >
+      <View
+        style={[
+          styles.center,
+          { paddingTop: Math.max(insets.top, 20) + 40 },
+        ]}
+      >
+        <Text style={styles.errorText}>Unable to load products.</Text>
+        <Pressable style={styles.retryButton} onPress={() => refetch()}>
           <Text style={styles.retryText}>Try Again</Text>
         </Pressable>
       </View>
@@ -115,9 +147,12 @@ export default function HomeScreen() {
       keyExtractor={(item) => item._id}
       ListHeaderComponent={<HomeHeader />}
       ListEmptyComponent={
-        <Text style={styles.statusText}>
-          No products available.
-        </Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>No Products Found</Text>
+          <Text style={styles.statusText}>
+            Check back soon for new arrivals.
+          </Text>
+        </View>
       }
       renderItem={({ item }: { item: Product }) => (
         <ProductCard
@@ -127,9 +162,13 @@ export default function HomeScreen() {
           description={item.description}
           stock={item.stock}
           hasVariants={item.variants.length > 0}
+          images={item.images}
         />
       )}
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[
+        styles.container,
+        { paddingBottom: 80 + insets.bottom },
+      ]}
       showsVerticalScrollIndicator={false}
     />
   );
@@ -137,94 +176,172 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    paddingHorizontal: 20,
     backgroundColor: "#F8FAFC",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 30,
+    marginBottom: 20,
   },
   logo: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  welcome: {
-    marginTop: 35,
-  },
-  heading: {
     fontSize: 26,
-    fontWeight: "bold",
+    fontWeight: "900",
+    color: "#2563EB",
+    letterSpacing: -0.5,
   },
-  subtitle: {
-    color: "gray",
-    marginTop: 5,
+  storeTagline: {
+    fontSize: 12,
+    color: "#64748B",
+    marginTop: 2,
+    fontWeight: "500",
+  },
+  cartHeaderButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+  },
+  cartCountText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#2563EB",
   },
   banner: {
     backgroundColor: "#2563EB",
-    padding: 25,
-    borderRadius: 15,
-    marginTop: 25,
+    padding: 22,
+    borderRadius: 16,
+    marginBottom: 24,
+    shadowColor: "#2563EB",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  bannerBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  bannerBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 0.8,
   },
   bannerTitle: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
+    fontWeight: "800",
+    color: "#FFFFFF",
   },
-  bannerText: {
-    color: "white",
-    marginTop: 8,
+  bannerSubtitle: {
+    color: "rgba(255,255,255,0.9)",
+    fontSize: 14,
+    marginTop: 6,
+    lineHeight: 20,
   },
-  button: {
-    backgroundColor: "white",
-    padding: 12,
-    borderRadius: 8,
+  bannerButton: {
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 10,
     alignSelf: "flex-start",
-    marginTop: 15,
+    marginTop: 16,
   },
-  buttonText: {
+  bannerButtonText: {
     color: "#2563EB",
-    fontWeight: "bold",
+    fontWeight: "700",
+    fontSize: 13,
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: 30,
-    marginBottom: 15,
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#0F172A",
+  },
+  seeAllText: {
+    color: "#2563EB",
+    fontSize: 13,
+    fontWeight: "600",
   },
   categories: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 8,
+    marginBottom: 24,
   },
-  category: {
-    backgroundColor: "white",
-    padding: 15,
-    borderRadius: 10,
+  categoryChip: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    paddingVertical: 9,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  categoryChipText: {
+    color: "#334155",
+    fontSize: 13,
+    fontWeight: "600",
   },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#F8FAFC",
+    padding: 24,
   },
   statusText: {
     marginTop: 12,
-    color: "gray",
+    color: "#64748B",
+    fontSize: 14,
   },
   errorText: {
-    color: "red",
-    fontSize: 16,
+    color: "#DC2626",
+    fontSize: 15,
+    fontWeight: "600",
+    textAlign: "center",
   },
   retryButton: {
     backgroundColor: "#2563EB",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 22,
+    borderRadius: 10,
+    marginTop: 16,
   },
   retryText: {
-    color: "white",
-    fontWeight: "bold",
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  emptyContainer: {
+    paddingVertical: 40,
+    alignItems: "center",
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  buttonPressed: {
+    opacity: 0.8,
   },
 });

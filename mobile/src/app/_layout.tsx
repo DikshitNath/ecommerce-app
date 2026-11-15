@@ -8,6 +8,8 @@ import {
 } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useColorScheme } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 
 import {
@@ -106,39 +108,44 @@ export default function RootLayout() {
   }, [status, initialize, markBackendOffline]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-      >
-        <AnimatedSplashOverlay />
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+          <AnimatedSplashOverlay />
 
-        {status !== "loading" && (
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Protected guard={!isAuthenticated}>
-              <Stack.Screen name="login" />
-              <Stack.Screen name="register" />
-            </Stack.Protected>
+          {status !== "loading" && (
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Protected guard={!isAuthenticated}>
+                <Stack.Screen name="login" />
+                <Stack.Screen name="register" />
+              </Stack.Protected>
 
-            <Stack.Protected guard={isAuthenticated}>
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="product-details" />
-              <Stack.Screen name="checkout" />
-              <Stack.Screen name="payment" />
-              <Stack.Screen name="payment-processing" />
-              <Stack.Screen name="payment-success" />
-              <Stack.Screen name="payment-failure" />
-              <Stack.Screen name="order-details" />
-              <Stack.Screen name="api-test" />
-            </Stack.Protected>
+              <Stack.Protected guard={isAuthenticated}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="product-details" />
+                <Stack.Screen name="checkout" />
+                <Stack.Screen name="payment" />
+                <Stack.Screen name="payment-processing" />
+                <Stack.Screen name="payment-success" />
+                <Stack.Screen name="payment-failure" />
+                <Stack.Screen name="order-details" />
+                <Stack.Screen name="api-test" />
+              </Stack.Protected>
 
-            <Stack.Protected guard={isVerifiedAdmin}>
-              <Stack.Screen name="admin" />
-              <Stack.Screen name="admin-add-product" />
-              <Stack.Screen name="admin-edit-product" />
-            </Stack.Protected>
-          </Stack>
-        )}
-      </ThemeProvider>
-    </QueryClientProvider>
+              <Stack.Protected guard={isVerifiedAdmin}>
+                <Stack.Screen name="admin" />
+                <Stack.Screen name="admin-add-product" />
+                <Stack.Screen name="admin-edit-product" />
+                <Stack.Screen name="admin-orders" />
+                <Stack.Screen name="admin-order-details" />
+              </Stack.Protected>
+            </Stack>
+          )}
+        </ThemeProvider>
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }

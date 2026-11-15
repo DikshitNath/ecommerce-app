@@ -8,6 +8,7 @@ export type CartProduct = {
   price: number;
   description: string;
   stock: number;
+  images?: string[];
 };
 
 export type SelectedVariants = Record<string, string>;
